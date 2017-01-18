@@ -2,11 +2,9 @@
 import json
 import codecs
 import sys
-from jsonpath_rw import jsonpath, parse
 import os
 import fnmatch
-# import time
-# from optparse import OptionParser
+from optparse import OptionParser
 from initExtractors import ProcessExtractor
 
 
@@ -40,44 +38,55 @@ if __name__ == "__main__":
     input_path = sys.argv[1]
     output_file = sys.argv[2]
 
+    parser = OptionParser()
+    parser.add_option("-l", "--landmarkRules", action="store", type="string", dest="landmarkRules")
+    (c_options, args) = parser.parse_args()
+
+    try:
+        input_path = args[0]
+        output_file = args[1]
+        properties_file = args[2]
+    except Exception as e:
+        print "Usage error: python run.py <input> <output> <properties>"
+        sys.exit()
+
     # Init the extractors
     content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL']
-    data_extractors = ['age', 'phone']
+    data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color']
+    properties = load_json_file(properties_file)
+
     # Initialize only requires extractors
-    pe = ProcessExtractor(content_extractors, data_extractors)
+    pe = ProcessExtractor(content_extractors, data_extractors, properties)
+
     # Build tree from raw content
     # get all processors for root extractors
     eps = pe.buildTreeFromHtml()
 
     o = codecs.open(output_file, 'w', 'utf-8')
+    i = 1
     for jl in jl_file_iterator(input_path):
+        print '*' * 20, "Processing file, ", i, '*' * 20
+        print "Building and running root extractors..."
         result_doc = pe.execute_processor_chain(jl, eps)
         result_doc['raw_content'] = "..."
 
         # Build tokens for root extractors
+        print "Building and running tokenizer extractors..."
         eps = pe.buildTokens(result_doc)
         result_doc = pe.execute_processor_chain(result_doc, eps)
+        print "Storing simple tokens from crf tokens..."
         result_doc = pe.buildSimpleTokensFromStructured(result_doc)
 
+        print "Building data extractors..."
         eps = pe.buildDataExtractors(result_doc)
+        print "Running data extractors..."
         result_doc = pe.execute_processor_chain(result_doc, eps)
+        print "Done"
 
         # annotate
-        # ranking
-
+        print "Annotating tokens and data extractors..."
+        result_doc = pe.anotateDocTokens(result_doc)
+        print "Done.."
+        print '*' * 20, " End ", '*' * 20
         o.write(json.dumps(result_doc) + '\n')
     o.close()
-
-    # parser = OptionParser()
-    # parser.add_option("-l", "--landmarkRules", action="store", type="string", dest="landmarkRules")
-    # (c_options, args) = parser.parse_args()
-
-    # input_path = args[0]
-    # output_file = args[1]
-    # properties_file = args[2]
-    # landmark_rules_file = c_options.landmarkRules
-
-    # properties = load_json_file(properties_file)
-    # landmark_rules = None
-    # if landmark_rules_file:
-    #     landmark_rules = load_json_file(landmark_rules_file)

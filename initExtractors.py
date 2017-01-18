@@ -1,16 +1,21 @@
 import json
 import time
 from tldextract import tldextract
+import codecs
+import re
 from digReadabilityExtractor.readability_extractor import ReadabilityExtractor
 from digExtractor.extractor_processor import ExtractorProcessor
 from digTokenizerExtractor.tokenizer_extractor import TokenizerExtractor
 from jsonpath_rw import parse, jsonpath
-# from parse import DatumInContext, Index, Fields
 from digPhoneExtractor.phone_extractor import PhoneExtractor
 from digAgeRegexExtractor.age_regex_helper import get_age_regex_extractor
-# from objectpath import *
+from digDictionaryExtractor.populate_trie import populate_trie
+from digDictionaryExtractor.dictionary_extractor import DictionaryExtractor
+
 
 fields_to_remove = ["crawl_data", "extracted_metadata"]
+my_name_is_name_regex = re.compile('(?:my[\s]+name[\s]+is[\s]+([-a-z0-9@$!]+))', re.IGNORECASE)
+name_filter_regex = re.compile('[a-z].*[a-z]')
 # Initialize root extractors
 readability_extractor_init = ReadabilityExtractor()
 readability_extractor_rc_init = ReadabilityExtractor().set_recall_priority(False)
@@ -18,6 +23,43 @@ tokenizer_extractor = TokenizerExtractor(recognize_linebreaks=True, create_struc
 # init sub root extractors
 phone_extractor_init = PhoneExtractor().set_metadata({'extractor': 'phone', 'semantic_type': 'phone', 'input_type': ['tokens']}).set_source_type('text')
 age_extracor_init = get_age_regex_extractor().set_metadata({'semantic_type': 'age', 'input_type': ['text']}).set_include_context(True)
+
+city_dictionary_extractor_init = DictionaryExtractor() \
+    .set_ngrams(3) \
+    .set_pre_filter(lambda x: name_filter_regex.match(x)) \
+    .set_pre_process(lambda x: x.lower()) \
+    .set_metadata({
+        'extractor': 'dig_cities_dictionary_extractor',
+        'semantic_type': 'city',
+        'input_type': ['tokens'],
+        'type': 'dictionary',  # !Important
+        'properties_key': 'cities',  # !Important
+    }) \
+    .set_include_context(True)
+
+ethnicities_dictionary_extractor_init = DictionaryExtractor() \
+    .set_pre_filter(lambda x: name_filter_regex.match(x)) \
+    .set_pre_process(lambda x: x.lower()) \
+    .set_metadata({
+        'extractor': 'dig_ethnicities_dictionary_extractor',
+        'semantic_type': 'ethnicity',
+        'input_type': ['tokens'],
+        'type': 'dictionary',  # !Important
+        'properties_key': 'ethnicities',  # !Important
+    }) \
+    .set_include_context(True)
+
+hair_color_dictionary_extractor_init = DictionaryExtractor() \
+    .set_pre_filter(lambda x: name_filter_regex.match(x)) \
+    .set_pre_process(lambda x: x.lower()) \
+    .set_metadata({
+        'extractor': 'dig_haircolor_dictionary_extractor',
+        'semantic_type': 'hair_color',
+        'input_type': ['tokens'],
+        'type': 'dictionary',  # !Important
+        'properties_key': 'haircolor',  # !Important
+    }) \
+    .set_include_context(True)
 # city extractor
 
 
@@ -55,6 +97,12 @@ class Extractor(object):
     return doc
 
   @staticmethod
+  def load_trie(file_name):
+      values = json.load(codecs.open(file_name, 'r', 'utf-8'))
+      trie = populate_trie(map(lambda x: x.lower(), values))
+      return trie
+
+  @staticmethod
   def execute_processor_chain(doc, extractor_processors):
     """Applies a sequence of ExtractorProcessors which wrap Extractors
     to a doc which will then contain all the extracted values"""
@@ -79,19 +127,14 @@ content_extractors = {
     'READABILITY_LOW_RECALL': Extractor(readability_extractor_rc_init, 'raw_content', 'extractors.content_strict.text')
 }
 
-data_extractors = [
-    phone_extractor_init,
-    age_extracor_init
-]
-
 """ ************** END INTIALIZATION ******************  """
 
 
 class ProcessExtractor(Extractor):
   """ Class to process the document - Extend functions from Extractor class """
-  def __init__(self, content_extractors, data_extractors):
+  def __init__(self, content_extractors, data_extractors, properties=None):
     self.content_extractors = self.__initialize(content_extractors)
-    self.data_extractors = self.__get_data_extractor(data_extractors)
+    self.data_extractors = self.__get_data_extractor(data_extractors, properties)
 
   def __initialize(self, extractors_selection, type_filter=None):
     """ Initialize content extractors """
@@ -104,13 +147,29 @@ class ProcessExtractor(Extractor):
         print extractor + ' - Not found'
     return result
 
-  def __get_data_extractor(self, sub):
+  def __get_data_extractor(self, sub, properties):
     """ Initialize all data extractors and return only extractors that are included
         in the execution request chain
     """
+    data_extractors = [
+        phone_extractor_init,
+        age_extracor_init,
+        city_dictionary_extractor_init,
+        hair_color_dictionary_extractor_init
+    ]
+
     res = []
     for extractor in data_extractors:
       metadata = extractor.get_metadata()
+    # !Important : If metadata has type dictionary than load properties into extractor
+      if 'type' in metadata.keys() and 'properties_key' in metadata.keys():
+        if metadata['type'] == 'dictionary':
+          extractor.set_trie(Extractor.load_trie(properties[metadata['properties_key']]))
+      elif 'type' in metadata.keys():
+        if metadata['type'] == 'dictionary' and 'properties_key' not in metadata.keys():
+          print 'No properties key mentioned in metadata avoiding - ', metadata['semantic_type']
+          continue
+
       if metadata['semantic_type'] in sub:
         res.append(extractor)
     return res
@@ -148,7 +207,7 @@ class ProcessExtractor(Extractor):
       output = metadata['semantic_type']
 
       for inp in inputs:
-        print inp, output
+        print "building..", output, " extractor"
         input_suffix, expression = '', ''
         if inp == 'tokens':
           input_suffix = '[0].result[0].value'
@@ -163,7 +222,7 @@ class ProcessExtractor(Extractor):
           op = '.'.join(value.split('.')[:-1])
           processor = ExtractorProcessor() \
               .set_input_fields(value + input_suffix) \
-              .set_output_field(op + '.' + output) \
+              .set_output_field(op + '.data_extractors.' + output) \
               .set_extractor(extractor) \
               .set_name(output)
           ep.append(processor)
@@ -182,7 +241,6 @@ class ProcessExtractor(Extractor):
 
   def update_json(self, doc, matches, name, value, index=0, parent=False):
     load_input_json = doc
-    # matches = self._json_path_search(load_input_json, expr)
     datum_object = matches[int(index)]
     if not isinstance(datum_object, jsonpath.DatumInContext):
       raise Exception("Nothing found by the given json-path")
@@ -205,6 +263,44 @@ class ProcessExtractor(Extractor):
       tokens = val[0]['result'][0]['value']
       new_simple_tokens = [tk['value'] for tk in tokens]
       data = [{"result": [{"value": new_simple_tokens}]}]
-      self.update_json(doc, matches, 'tokens', data, i, parent=True)
+      doc = self.update_json(doc, matches, 'tokens', data, i, parent=True)
+      i += 1
+    return doc
+
+  def annotateTokenToExtractions(self, tokens, extractions):
+    for extractor, extraction in extractions.iteritems():
+      data = extraction[0]['result']
+      for extraction in data:
+        start = extraction['context']['start']
+        end = extraction['context']['end']
+        offset = 0
+        for i in range(start, end):
+          if 'semantic_type' not in tokens[i].keys():
+            tokens[i]['semantic_type'] = []
+          temp = {}
+          temp['type'] = extractor
+          temp['offset'] = offset
+          if offset == 0:
+            temp['length'] = end - start
+          tokens[i]['semantic_type'].append(temp)
+          offset += 1
+    return tokens
+
+  def anotateDocTokens(self, doc):
+    expression = 'extractors.*.crf_tokens'
+    jsonpath_expr = parse(expression)
+    matches = jsonpath_expr.find(doc)
+    i = 0
+    for match in matches:
+      val, path = match.value, str(match.full_path)
+      tokens = val[0]['result'][0]['value']
+    # find data extractors
+      data_expression = '.'.join(path.split('.')[:-1]) + '.data_extractors'
+      data_jsonpath_expr = parse(data_expression)
+      data_extractors_val = data_jsonpath_expr.find(doc)[0].value
+
+      annotated_tokens = self.annotateTokenToExtractions(tokens, data_extractors_val)
+      val[0]['result'][0]['value'] = annotated_tokens
+      doc = self.update_json(doc, matches, 'crf_tokens', val, i, parent=True)
       i += 1
     return doc
