@@ -10,13 +10,14 @@ from digPhoneExtractor.phone_extractor import PhoneExtractor
 from digAgeRegexExtractor.age_regex_helper import get_age_regex_extractor
 from digDictionaryExtractor.populate_trie import populate_trie
 from digDictionaryExtractor.dictionary_extractor import DictionaryExtractor
-import sys
-import os
-
-sys.path.insert(0, os.getcwd() + '/dig-table-extractor')
-sys.path.insert(0, os.getcwd() + '/dig-tokenizer-extractor')
-from digTableExtractor.table_extractor import TableExtractor
+# from digTableExtractor.table_extractor import TableExtractor
 from digTokenizerExtractor.tokenizer_extractor import TokenizerExtractor
+
+
+# sys.path.insert(0, os.getcwd() + '/dig-table-extractor')
+# sys.path.insert(0, os.getcwd() + '/dig-tokenizer-extractor')
+# from digTableExtractor.table_extractor import TableExtractor
+# from digTokenizerExtractor.tokenizer_extractor import TokenizerExtractor
 
 
 fields_to_remove = ["crawl_data", "extracted_metadata"]
@@ -25,7 +26,7 @@ name_filter_regex = re.compile('[a-z].*[a-z]')
 # Initialize root extractors
 readability_extractor_init = ReadabilityExtractor()
 readability_extractor_rc_init = ReadabilityExtractor().set_recall_priority(False)
-table_extractor_init = TableExtractor()
+# table_extractor_init = TableExtractor()
 
 tokenizer_extractor = TokenizerExtractor(recognize_linebreaks=True, create_structured_tokens=True).set_metadata({'extractor': 'crf_tokenizer'})
 # init sub root extractors
@@ -133,7 +134,7 @@ class Extractor(object):
 content_extractors = {
     'READABILITY_HIGH_RECALL': Extractor(readability_extractor_init, 'raw_content', 'extractors.content_relaxed.text'),
     'READABILITY_LOW_RECALL': Extractor(readability_extractor_rc_init, 'raw_content', 'extractors.content_strict.text'),
-    'TABLE': Extractor(table_extractor_init, 'raw_content', 'extractors.tables.text')
+    # 'TABLE': Extractor(table_extractor_init, 'raw_content', 'extractors.tables.text')
 }
 
 """ ************** END INTIALIZATION ******************  """
