@@ -53,7 +53,7 @@ if __name__ == "__main__":
         sys.exit()
 
     # Init the extractors
-    content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL']
+    content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL', 'TABLE']
     data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color']
     extraction_classifiers = ['city', 'ethnicity', 'hair-color']
     properties = load_json_file(properties_file)
@@ -69,14 +69,17 @@ if __name__ == "__main__":
 
     # Build tree from raw content
     # get all processors for root extractors
-    eps = pe.buildTreeFromHtml()
+    tree_eps = pe.buildTreeFromHtml()
 
     o = codecs.open(output_file, 'w', 'utf-8')
     i = 1
     for jl in jl_file_iterator(input_path):
         print '*' * 20, "Processing file, ", i, '*' * 20
-        print "Building and running root extractors..."
-        result_doc = pe.execute_processor_chain(jl, eps)
+        print "Building and running content extractors..."
+
+        result_doc = ''
+        print jl['_id']
+        result_doc = pe.execute_processor_chain(jl, tree_eps)
         result_doc['raw_content'] = "..."
 
         # Build tokens for root extractors
@@ -108,7 +111,5 @@ if __name__ == "__main__":
         print '*' * 20, " End ", '*' * 20
         o.write(json.dumps(result_doc) + '\n')
 
-        i+=1
-        if(i == 3):
-            break
+        i += 1
     o.close()
