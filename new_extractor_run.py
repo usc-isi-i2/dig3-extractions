@@ -53,7 +53,7 @@ if __name__ == "__main__":
         sys.exit()
 
     # Init the extractors
-    content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL', 'TABLE']
+    content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL']
     data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color']
     extraction_classifiers = ['city', 'ethnicity', 'hair-color']
     properties = load_json_file(properties_file)
@@ -78,7 +78,6 @@ if __name__ == "__main__":
         print "Building and running content extractors..."
 
         result_doc = ''
-        print jl['_id']
         result_doc = pe.execute_processor_chain(jl, tree_eps)
         result_doc['raw_content'] = "..."
 

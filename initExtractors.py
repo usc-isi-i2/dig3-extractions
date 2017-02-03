@@ -2,6 +2,8 @@ import json
 import time
 from tldextract import tldextract
 import codecs
+import os
+import sys
 import re
 from digReadabilityExtractor.readability_extractor import ReadabilityExtractor
 from digExtractor.extractor_processor import ExtractorProcessor
@@ -13,10 +15,10 @@ from digDictionaryExtractor.dictionary_extractor import DictionaryExtractor
 # from digTableExtractor.table_extractor import TableExtractor
 from digTokenizerExtractor.tokenizer_extractor import TokenizerExtractor
 
-
 # sys.path.insert(0, os.getcwd() + '/dig-table-extractor')
+
 # sys.path.insert(0, os.getcwd() + '/dig-tokenizer-extractor')
-# from digTableExtractor.table_extractor import TableExtractor
+from digTableExtractor.table_extractor import TableExtractor
 # from digTokenizerExtractor.tokenizer_extractor import TokenizerExtractor
 
 
@@ -24,9 +26,10 @@ fields_to_remove = ["crawl_data", "extracted_metadata"]
 my_name_is_name_regex = re.compile('(?:my[\s]+name[\s]+is[\s]+([-a-z0-9@$!]+))', re.IGNORECASE)
 name_filter_regex = re.compile('[a-z].*[a-z]')
 # Initialize root extractors
-readability_extractor_init = ReadabilityExtractor()
-readability_extractor_rc_init = ReadabilityExtractor().set_recall_priority(False)
-# table_extractor_init = TableExtractor()
+readability_extractor_init = ReadabilityExtractor().set_metadata({'type': 'readability_high_recall'})
+readability_extractor_rc_init = ReadabilityExtractor().set_recall_priority(False).set_metadata({'type': 'readability_low_recall'})
+table_extractor_init = TableExtractor().set_metadata({'type': 'table'})
+
 
 tokenizer_extractor = TokenizerExtractor(recognize_linebreaks=True, create_structured_tokens=True).set_metadata({'extractor': 'crf_tokenizer'})
 # init sub root extractors
@@ -134,7 +137,7 @@ class Extractor(object):
 content_extractors = {
     'READABILITY_HIGH_RECALL': Extractor(readability_extractor_init, 'raw_content', 'extractors.content_relaxed.text'),
     'READABILITY_LOW_RECALL': Extractor(readability_extractor_rc_init, 'raw_content', 'extractors.content_strict.text'),
-    # 'TABLE': Extractor(table_extractor_init, 'raw_content', 'extractors.tables.text')
+    'TABLE': Extractor(table_extractor_init, 'raw_content', 'extractors.tables.text')
 }
 
 """ ************** END INTIALIZATION ******************  """
@@ -198,15 +201,36 @@ class ProcessExtractor(Extractor):
   def buildTokens(self, doc):
     ep = []
     jsonpath_expr = parse('extractors.*.text')
-    values = [str(match.full_path) for match in jsonpath_expr.find(doc)]
+    values = [(str(match.full_path), match.value) for match in jsonpath_expr.find(doc)]
     for value in values:
-      op = '.'.join(value.split('.')[:-1])
-      token_ep = ExtractorProcessor() \
-          .set_name('tokens') \
-          .set_input_fields(value + '[0].result.value') \
-          .set_output_field(op + '.crf_tokens') \
-          .set_extractor(tokenizer_extractor)
-      ep.append(token_ep)
+      path = value[0]
+      data = value[1][0]
+      ep_type = "shhsh"
+
+    # special for table to find internal tokens
+      if ep_type == 'table':
+        table_expr = parse('result.value.tables[*].rows[*].cells[*].text')
+        table_values = [(str(match.full_path), match.value) for match in table_expr.find(data)]
+        for table_value in table_values:
+          table_path = table_value[0]
+          # table_path = re.sub("\.\[", "[", table_path)
+          ep_table_path = path + '[0].' + table_path
+          op = ep_table_path[:-5]
+          print op
+          token_ep = ExtractorProcessor() \
+              .set_name('tokens') \
+              .set_input_fields(ep_table_path + '[0].result.value') \
+              .set_output_field(op + '.crf_tokens') \
+              .set_extractor(tokenizer_extractor)
+          ep.append(token_ep)
+      else:
+        op = '.'.join(path.split('.')[:-1])
+        token_ep = ExtractorProcessor() \
+            .set_name('tokens') \
+            .set_input_fields(path + '[0].result.value') \
+            .set_output_field(op + '.crf_tokens') \
+            .set_extractor(tokenizer_extractor)
+        ep.append(token_ep)
     return ep
 
   def buildDataExtractors(self, doc):
@@ -314,7 +338,11 @@ class ProcessExtractor(Extractor):
     # find data extractors
       data_expression = '.'.join(path.split('.')[:-1]) + '.data_extractors'
       data_jsonpath_expr = parse(data_expression)
-      data_extractors_val = data_jsonpath_expr.find(doc)[0].value
+
+      results_expr = data_jsonpath_expr.find(doc)
+      if len(results_expr) == 0:
+        continue
+      data_extractors_val = results_expr[0].value
 
       annotated_tokens = self.annotateTokenToExtractions(tokens, data_extractors_val)
       val[0]['result'][0]['value'] = annotated_tokens
