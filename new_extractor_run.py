@@ -7,7 +7,7 @@ import fnmatch
 from optparse import OptionParser
 from initExtractors import ProcessExtractor
 from initClassifiers import ProcessClassifier
-from initILP import ProcessILP
+# from initILP import ProcessILP
 
 
 def load_json_file(file_name):
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     classifier_processor = ProcessClassifier(extraction_classifiers)
 
     # Initialize the ILP engine
-    ilp_processor = ProcessILP(properties)
+    # ilp_processor = ProcessILP(properties)
 
     # Build tree from raw content
     # get all processors for root extractors
@@ -103,8 +103,8 @@ if __name__ == "__main__":
         result_doc = classifier_processor.classify_extractions(result_doc)
 
         # Formulating and Solving the ILP for the extractions
-        print "Formulating and Solving the ILP"
-        result_doc = ilp_processor.run_ilp(result_doc)        
+        # print "Formulating and Solving the ILP"
+        # result_doc = ilp_processor.run_ilp(result_doc)        
 
         print "Done.."
         print '*' * 20, " End ", '*' * 20
