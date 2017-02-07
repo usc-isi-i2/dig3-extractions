@@ -6,7 +6,7 @@ import os
 import sys
 import re
 from digReadabilityExtractor.readability_extractor import ReadabilityExtractor
-from digExtractor.extractor_processor import ExtractorProcessor
+# from digExtractor.extractor_processor import ExtractorProcessor
 from jsonpath_rw import parse, jsonpath
 from digPhoneExtractor.phone_extractor import PhoneExtractor
 from digAgeRegexExtractor.age_regex_helper import get_age_regex_extractor
@@ -15,10 +15,13 @@ from digDictionaryExtractor.dictionary_extractor import DictionaryExtractor
 # from digTableExtractor.table_extractor import TableExtractor
 from digTokenizerExtractor.tokenizer_extractor import TokenizerExtractor
 
-# sys.path.insert(0, os.getcwd() + '/dig-table-extractor')
+
+sys.path.insert(0, os.getcwd() + '/dig-table-extractor')
+sys.path.insert(0, os.getcwd() + '/dig-extractor1')
 
 # sys.path.insert(0, os.getcwd() + '/dig-tokenizer-extractor')
 from digTableExtractor.table_extractor import TableExtractor
+from digExtractor1.extractor_processor import ExtractorProcessor
 # from digTokenizerExtractor.tokenizer_extractor import TokenizerExtractor
 
 
@@ -205,7 +208,7 @@ class ProcessExtractor(Extractor):
     for value in values:
       path = value[0]
       data = value[1][0]
-      ep_type = "shhsh"
+      ep_type = data['type']
 
     # special for table to find internal tokens
       if ep_type == 'table':
@@ -213,10 +216,8 @@ class ProcessExtractor(Extractor):
         table_values = [(str(match.full_path), match.value) for match in table_expr.find(data)]
         for table_value in table_values:
           table_path = table_value[0]
-          # table_path = re.sub("\.\[", "[", table_path)
           ep_table_path = path + '[0].' + table_path
           op = ep_table_path[:-5]
-          print op
           token_ep = ExtractorProcessor() \
               .set_name('tokens') \
               .set_input_fields(ep_table_path + '[0].result.value') \
@@ -262,6 +263,35 @@ class ProcessExtractor(Extractor):
           ep.append(processor)
     return ep
 
+  def buildDataExtractorsForTable(self, doc):
+    ep = []
+    for extractor in self.data_extractors:
+      metadata = extractor.get_metadata()
+      inputs = metadata['input_type']
+      output = metadata['semantic_type']
+
+      for inp in inputs:
+        print "building..", output, " extractor for tables"
+        input_suffix, expression = '', ''
+        if inp == 'tokens':
+          input_suffix = '[0].result[0].value'
+          expression = 'extractors.tables.text.[*].result.value.tables[*].rows[*].cells[*].tokens'
+        elif inp == "text":
+          input_suffix = '[0].result.value'
+          expression = 'extractors.tables.text.[*].result.value.tables[*].rows[*].cells[*].text'
+
+        jsonpath_expr = parse(expression)
+        values = [str(match.full_path) for match in jsonpath_expr.find(doc)]
+        for value in values:
+          op = '.'.join(value.split('.')[:-1])
+          processor = ExtractorProcessor() \
+              .set_input_fields(value + input_suffix) \
+              .set_output_field(op + '.data_extractors.' + output) \
+              .set_extractor(extractor) \
+              .set_name(output)
+          ep.append(processor)
+    return ep
+
   def string_to_json(self, source):
       try:
           load_input_json = json.loads(source)
@@ -280,10 +310,8 @@ class ProcessExtractor(Extractor):
       raise Exception("Nothing found by the given json-path")
     path = datum_object.path
     if isinstance(path, jsonpath.Index):
-        # datum_object.context.value[datum_object.path.index] = value
-        datum_object.context.value[name] = value
+      datum_object.context.value[datum_object.path.index][name] = value
     elif isinstance(path, jsonpath.Fields):
-        # datum_object.context.value[datum_object.path.fields[0]] = value
       datum_object.context.value[name] = value
     return load_input_json
 
@@ -298,6 +326,18 @@ class ProcessExtractor(Extractor):
       new_simple_tokens = [tk['value'] for tk in tokens]
       data = [{"result": [{"value": new_simple_tokens}]}]
       doc = self.update_json(doc, matches, 'tokens', data, i, parent=True)
+      i += 1
+    # for tables
+    table_expr = parse('extractors.tables.text.[*].result.value.tables[*].rows[*].cells[*].crf_tokens')
+    table_matches = table_expr.find(doc)
+    i = 0
+    # table_values = [(str(match.full_path), match.value) for match in table_expr.find(doc)]
+    for match in table_matches:
+      val = match.value
+      tokens = val[0]['result'][0]['value']
+      new_simple_tokens = [tk['value'] for tk in tokens]
+      data = [{"result": [{"value": new_simple_tokens}]}]
+      doc = self.update_json(doc, table_matches, 'tokens', data, i, parent=True)
       i += 1
     return doc
 

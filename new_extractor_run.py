@@ -51,7 +51,7 @@ if __name__ == "__main__":
         sys.exit()
 
     # Init the extractors
-    content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL']
+    content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL', 'TABLE']
     data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color']
     properties = load_json_file(properties_file)
 
@@ -81,6 +81,12 @@ if __name__ == "__main__":
 
         print "Building data extractors..."
         eps = pe.buildDataExtractors(result_doc)
+        print "Running data extractors..."
+        result_doc = pe.execute_processor_chain(result_doc, eps)
+        print "Done"
+
+        print "Building data extractors for tables..."
+        eps = pe.buildDataExtractorsForTable(result_doc)
         print "Running data extractors..."
         result_doc = pe.execute_processor_chain(result_doc, eps)
         print "Done"
