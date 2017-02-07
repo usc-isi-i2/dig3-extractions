@@ -16,8 +16,8 @@ from digDictionaryExtractor.dictionary_extractor import DictionaryExtractor
 from digTokenizerExtractor.tokenizer_extractor import TokenizerExtractor
 
 
-# sys.path.insert(0, os.getcwd() + '/dig-table-extractor')
-# sys.path.insert(0, os.getcwd() + '/dig-extractor1')
+sys.path.insert(0, os.getcwd() + '/dig-table-extractor')
+sys.path.insert(0, os.getcwd() + '/dig-extractor1')
 
 # sys.path.insert(0, os.getcwd() + '/dig-tokenizer-extractor')
 from digTableExtractor.table_extractor import TableExtractor
@@ -367,8 +367,11 @@ class ProcessExtractor(Extractor):
           offset += 1
     return tokens
 
-  def anotateDocTokens(self, doc):
-    expression = 'extractors.*.crf_tokens'
+  def anotateDocTokens(self, doc, type=None):
+    if type == 'Table':
+      expression = 'extractors.tables.text.[*].result.value.tables[*].rows[*].cells[*].crf_tokens'
+    else:
+      expression = 'extractors.*.crf_tokens'
     jsonpath_expr = parse(expression)
     matches = jsonpath_expr.find(doc)
     i = 0
@@ -381,11 +384,13 @@ class ProcessExtractor(Extractor):
 
       results_expr = data_jsonpath_expr.find(doc)
       if len(results_expr) == 0:
+        i += 1
         continue
       data_extractors_val = results_expr[0].value
 
       annotated_tokens = self.annotateTokenToExtractions(tokens, data_extractors_val)
       val[0]['result'][0]['value'] = annotated_tokens
+
       doc = self.update_json(doc, matches, 'crf_tokens', val, i, parent=True)
       i += 1
     return doc

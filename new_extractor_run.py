@@ -104,6 +104,9 @@ if __name__ == "__main__":
         print "Annotating tokens and data extractors..."
         result_doc = pe.anotateDocTokens(result_doc)
 
+        print "Annotating tokens and data extractors for table..."
+        result_doc = pe.anotateDocTokens(result_doc, type='Table')
+
         # Classifying the extractions using their context and appending the probabilities
         print "Classifying the extractions..."
         result_doc = classifier_processor.classify_extractions(result_doc)
