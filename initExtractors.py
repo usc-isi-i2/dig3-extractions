@@ -16,8 +16,8 @@ from digDictionaryExtractor.dictionary_extractor import DictionaryExtractor
 from digTokenizerExtractor.tokenizer_extractor import TokenizerExtractor
 
 
-sys.path.insert(0, os.getcwd() + '/dig-table-extractor')
-sys.path.insert(0, os.getcwd() + '/dig-extractor1')
+# sys.path.insert(0, os.getcwd() + '/dig-table-extractor')
+# sys.path.insert(0, os.getcwd() + '/dig-extractor1')
 
 # sys.path.insert(0, os.getcwd() + '/dig-tokenizer-extractor')
 from digTableExtractor.table_extractor import TableExtractor
