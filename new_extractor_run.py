@@ -6,6 +6,8 @@ import os
 import fnmatch
 from optparse import OptionParser
 from initExtractors import ProcessExtractor
+from initClassifiers import ProcessClassifier
+# from initILP import ProcessILP
 
 
 def load_json_file(file_name):
@@ -53,10 +55,17 @@ if __name__ == "__main__":
     # Init the extractors
     content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL', 'TABLE']
     data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color']
+    extraction_classifiers = ['city', 'ethnicity', 'hair-color']
     properties = load_json_file(properties_file)
 
     # Initialize only requires extractors
     pe = ProcessExtractor(content_extractors, data_extractors, properties)
+
+    # Initialize the classifiers
+    classifier_processor = ProcessClassifier(extraction_classifiers)
+
+    # Initialize the ILP engine
+    # ilp_processor = ProcessILP(properties)
 
     # Build tree from raw content
     # get all processors for root extractors
@@ -94,8 +103,18 @@ if __name__ == "__main__":
         # annotate
         print "Annotating tokens and data extractors..."
         result_doc = pe.anotateDocTokens(result_doc)
+
+        # Classifying the extractions using their context and appending the probabilities
+        print "Classifying the extractions..."
+        result_doc = classifier_processor.classify_extractions(result_doc)
+
+        # Formulating and Solving the ILP for the extractions
+        # print "Formulating and Solving the ILP"
+        # result_doc = ilp_processor.run_ilp(result_doc)        
+
         print "Done.."
         print '*' * 20, " End ", '*' * 20
         o.write(json.dumps(result_doc) + '\n')
+
         i += 1
     o.close()
