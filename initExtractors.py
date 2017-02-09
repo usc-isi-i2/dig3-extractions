@@ -12,7 +12,6 @@ from digPhoneExtractor.phone_extractor import PhoneExtractor
 from digAgeRegexExtractor.age_regex_helper import get_age_regex_extractor
 from digDictionaryExtractor.populate_trie import populate_trie
 from digDictionaryExtractor.dictionary_extractor import DictionaryExtractor
-# from digTableExtractor.table_extractor import TableExtractor
 from digTokenizerExtractor.tokenizer_extractor import TokenizerExtractor
 
 
