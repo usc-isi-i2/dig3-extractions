@@ -173,7 +173,10 @@ class ProcessExtractor(Extractor):
                                                                  ['raw_content', 'tld'],
                                                                  lambda tld: tld,
                                                                  None,
-                                                                 True).set_name("landmark_extractor")
+                                                                 True).set_metadata({
+                                                                    'extractor': 'landmark_extractor',
+                                                                    'semantic_type': 'landmark'
+                                                                })
 
     data_extractors = [
         phone_extractor_init,
@@ -182,9 +185,6 @@ class ProcessExtractor(Extractor):
         hair_color_dictionary_extractor_init,
         ethnicities_dictionary_extractor_init
     ]
-
-    if landmark_extractor_init:
-        data_extractors.append(landmark_extractor_init)
 
     res = []
     for extractor in data_extractors:
@@ -200,6 +200,9 @@ class ProcessExtractor(Extractor):
 
       if metadata['semantic_type'] in sub:
         res.append(extractor)
+
+    if 'landmark' in sub and landmark_extractor_init:
+        res.append(landmark_extractor_init)
     return res
 
   def buildTreeFromHtml(self, tokenizer=False):

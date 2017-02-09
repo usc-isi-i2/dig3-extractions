@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
     # Init the extractors
     content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL', 'TABLE']
-    data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color']
+    data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color', 'landmark']
     extraction_classifiers = ['city', 'ethnicity', 'hair-color', 'name', 'eye-color']
     properties = load_json_file(properties_file)
 
@@ -90,7 +90,7 @@ if __name__ == "__main__":
         eps = pe.buildTokens(result_doc)
         result_doc = pe.execute_processor_chain(result_doc, eps)
         print "Storing simple tokens from crf tokens..."
-        result_doc = pe.buildSimpleTokensFromStructured(result_doc)
+        result_doc = pe.buildSimpleTokensFromStructured(pe.add_tld(result_doc))
 
         print "Building data extractors..."
         eps = pe.buildDataExtractors(result_doc)
