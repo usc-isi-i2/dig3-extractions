@@ -79,7 +79,6 @@ if __name__ == "__main__":
 
         result_doc = ''
         result_doc = pe.execute_processor_chain(jl, tree_eps)
-        result_doc['raw_content'] = "..."
 
         # Build tokens for root extractors
         print "Building and running tokenizer extractors..."
