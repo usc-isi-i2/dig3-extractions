@@ -49,6 +49,18 @@ city_dictionary_extractor_init = DictionaryExtractor() \
     }) \
     .set_include_context(True)
 
+name_dictionary_extractor_init = DictionaryExtractor() \
+    .set_pre_filter(lambda x: name_filter_regex.match(x)) \
+    .set_pre_process(lambda x: x.lower()) \
+    .set_metadata({
+        'extractor': 'dig_name_dictionary_extractor',
+        'semantic_type': 'name',
+        'input_type': ['tokens'],
+        'type': 'dictionary',
+        'properties_key': 'names_low_precision'
+    }) \
+    .set_include_context(True)
+
 ethnicities_dictionary_extractor_init = DictionaryExtractor() \
     .set_pre_filter(lambda x: name_filter_regex.match(x)) \
     .set_pre_process(lambda x: x.lower()) \
@@ -168,7 +180,8 @@ class ProcessExtractor(Extractor):
         phone_extractor_init,
         age_extracor_init,
         city_dictionary_extractor_init,
-        hair_color_dictionary_extractor_init
+        hair_color_dictionary_extractor_init,
+        name_dictionary_extractor_init
     ]
 
     res = []
