@@ -13,14 +13,10 @@ from digAgeRegexExtractor.age_regex_helper import get_age_regex_extractor
 from digDictionaryExtractor.populate_trie import populate_trie
 from digDictionaryExtractor.dictionary_extractor import DictionaryExtractor
 from digTokenizerExtractor.tokenizer_extractor import TokenizerExtractor
-
-
-#sys.path.insert(0, os.getcwd() + '/dig-table-extractor')
-#sys.path.insert(0, os.getcwd() + '/dig-extractor1')
-
-# sys.path.insert(0, os.getcwd() + '/dig-tokenizer-extractor')
 from digTableExtractor.table_extractor import TableExtractor
 from digExtractor.extractor_processor import ExtractorProcessor
+from digLandmarkExtractor.get_landmark_extractor_processors import get_multiplexing_landmark_extractor_processor
+from landmark_extractor.extraction.Landmark import RuleSet
 # from digTokenizerExtractor.tokenizer_extractor import TokenizerExtractor
 
 
@@ -147,9 +143,10 @@ content_extractors = {
 
 class ProcessExtractor(Extractor):
   """ Class to process the document - Extend functions from Extractor class """
-  def __init__(self, content_extractors, data_extractors, properties=None):
+  def __init__(self, content_extractors, data_extractors, properties=None, landmark_rules=None):
     self.content_extractors = self.__initialize(content_extractors)
     self.data_extractors = self.__get_data_extractor(data_extractors, properties)
+    self.landmark_rules = landmark_rules
 
   def __initialize(self, extractors_selection, type_filter=None):
     """ Initialize content extractors """
@@ -166,12 +163,28 @@ class ProcessExtractor(Extractor):
     """ Initialize all data extractors and return only extractors that are included
         in the execution request chain
     """
+    landmark_extractor_init = None
+    if self.landmark_rules:
+        rule_sets = dict()
+        for key, value in self.landmark_rules.iteritems():
+            rule_sets[key] = RuleSet(value)
+
+        landmark_extractor_init = get_multiplexing_landmark_extractor_processor(rule_sets,
+                                                                 ['raw_content', 'tld'],
+                                                                 lambda tld: tld,
+                                                                 None,
+                                                                 True).set_name("landmark_extractor")
+
     data_extractors = [
         phone_extractor_init,
         age_extracor_init,
         city_dictionary_extractor_init,
-        hair_color_dictionary_extractor_init
+        hair_color_dictionary_extractor_init,
+        ethnicities_dictionary_extractor_init
     ]
+
+    if landmark_extractor_init:
+        data_extractors.append(landmark_extractor_init)
 
     res = []
     for extractor in data_extractors:

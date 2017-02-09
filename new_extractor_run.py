@@ -52,6 +52,11 @@ if __name__ == "__main__":
         print "Usage error: python run.py <input> <output> <properties>"
         sys.exit()
 
+    landmark_rules_file = c_options.landmarkRules
+    landmark_rules = None
+    if landmark_rules_file:
+        landmark_rules = json.load(codecs.open(landmark_rules_file, 'r', 'utf-8'))
+
     # Init the extractors
     content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL', 'TABLE']
     data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color']
