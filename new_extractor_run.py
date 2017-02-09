@@ -64,7 +64,7 @@ if __name__ == "__main__":
     properties = load_json_file(properties_file)
 
     # Initialize only requires extractors
-    pe = ProcessExtractor(content_extractors, data_extractors, properties)
+    pe = ProcessExtractor(content_extractors, data_extractors, properties, landmark_rules=landmark_rules)
 
     # Initialize the classifiers
     classifier_processor = ProcessClassifier(extraction_classifiers)
