@@ -53,7 +53,7 @@ if __name__ == "__main__":
         sys.exit()
 
     # Init the extractors
-    content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL']
+    content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL', 'TABLE']
     data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color']
     extraction_classifiers = ['city', 'ethnicity', 'hair-color']
     properties = load_json_file(properties_file)
@@ -94,9 +94,18 @@ if __name__ == "__main__":
         result_doc = pe.execute_processor_chain(result_doc, eps)
         print "Done"
 
+        print "Building data extractors for tables..."
+        eps = pe.buildDataExtractorsForTable(result_doc)
+        print "Running data extractors..."
+        result_doc = pe.execute_processor_chain(result_doc, eps)
+        print "Done"
+
         # annotate
         print "Annotating tokens and data extractors..."
         result_doc = pe.anotateDocTokens(result_doc)
+
+        print "Annotating tokens and data extractors for table..."
+        result_doc = pe.anotateDocTokens(result_doc, type='Table')
 
         # Classifying the extractions using their context and appending the probabilities
         print "Classifying the extractions..."
