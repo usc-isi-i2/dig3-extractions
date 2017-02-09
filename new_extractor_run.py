@@ -16,7 +16,7 @@ def load_json_file(file_name):
 
 
 def jl_file_iterator(file):
-    with codecs.open(file, 'r', 'utf-8') as f:
+    with codecs.open(file, 'r') as f:
         for line in f:
             document = json.loads(line)
             yield document
@@ -52,14 +52,19 @@ if __name__ == "__main__":
         print "Usage error: python run.py <input> <output> <properties>"
         sys.exit()
 
+    landmark_rules_file = c_options.landmarkRules
+    landmark_rules = None
+    if landmark_rules_file:
+        landmark_rules = json.load(codecs.open(landmark_rules_file, 'r', 'utf-8'))
+
     # Init the extractors
     content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL']
-    data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color', 'name']
-    extraction_classifiers = ['city', 'ethnicity', 'hair-color']
+    data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color', 'landmark', 'name']
+    extraction_classifiers = ['city', 'ethnicity', 'hair-color', 'name', 'eye-color']
     properties = load_json_file(properties_file)
 
     # Initialize only requires extractors
-    pe = ProcessExtractor(content_extractors, data_extractors, properties)
+    pe = ProcessExtractor(content_extractors, data_extractors, properties, landmark_rules=landmark_rules)
 
     # Initialize the classifiers
     classifier_processor = ProcessClassifier(extraction_classifiers)
@@ -79,14 +84,13 @@ if __name__ == "__main__":
 
         result_doc = ''
         result_doc = pe.execute_processor_chain(jl, tree_eps)
-        result_doc['raw_content'] = "..."
 
         # Build tokens for root extractors
         print "Building and running tokenizer extractors..."
         eps = pe.buildTokens(result_doc)
         result_doc = pe.execute_processor_chain(result_doc, eps)
         print "Storing simple tokens from crf tokens..."
-        result_doc = pe.buildSimpleTokensFromStructured(result_doc)
+        result_doc = pe.buildSimpleTokensFromStructured(pe.add_tld(result_doc))
 
         print "Building data extractors..."
         eps = pe.buildDataExtractors(result_doc)
@@ -94,9 +98,18 @@ if __name__ == "__main__":
         result_doc = pe.execute_processor_chain(result_doc, eps)
         print "Done"
 
+        print "Building data extractors for tables..."
+        eps = pe.buildDataExtractorsForTable(result_doc)
+        print "Running data extractors..."
+        result_doc = pe.execute_processor_chain(result_doc, eps)
+        print "Done"
+
         # annotate
         print "Annotating tokens and data extractors..."
         result_doc = pe.anotateDocTokens(result_doc)
+
+        print "Annotating tokens and data extractors for table..."
+        result_doc = pe.anotateDocTokens(result_doc, type='Table')
 
         # Classifying the extractions using their context and appending the probabilities
         print "Classifying the extractions..."

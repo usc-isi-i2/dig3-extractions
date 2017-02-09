@@ -1,0 +1,445 @@
+{
+  "mappings": {
+    "ads": {
+      "properties": {
+        "doc_id": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "fields": {
+          "properties": {
+            "age": {
+              "properties": {
+                "relaxed": {
+                  "properties": {
+                    "key": {
+                      "type": "long"
+                    },
+                    "name": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "strict": {
+                  "properties": {
+                    "key": {
+                      "type": "long"
+                    },
+                    "name": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "city": {
+              "properties": {
+                "relaxed": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "strict": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "country": {
+              "properties": {
+                "relaxed": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "strict": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "description": {
+              "properties": {
+                "relaxed": {
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "strict": {
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "email": {
+              "properties": {
+                "relaxed": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "strict": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "ethnicty": {
+              "properties": {
+                "relaxed": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "strict": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "eye-color": {
+              "properties": {
+                "relaxed": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "strict": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "hair-color": {
+              "properties": {
+                "strict": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "relaxed": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "height": {
+              "properties": {
+                "relaxed": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "search": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "strict": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "search": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "name": {
+              "properties": {
+                "relaxed": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "strict": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "phone": {
+              "properties": {
+                "relaxed": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "strict": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "posting-date": {
+              "properties": {
+                "strict": {
+                  "properties": {
+                    "key": {
+                      "type": "date",
+                      "format": "strict_date_optional_time||epoch_millis"
+                    },
+                    "name": {
+                      "type": "date",
+                      "format": "strict_date_optional_time||epoch_millis"
+                    }
+                  }
+                },
+                "relaxed": {
+                  "properties": {
+                    "key": {
+                      "type": "date",
+                      "format": "strict_date_optional_time||epoch_millis"
+                    },
+                    "name": {
+                      "type": "date",
+                      "format": "strict_date_optional_time||epoch_millis"
+                    }
+                  }
+                }
+              }
+            },
+            "price": {
+              "properties": {
+                "relaxed": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "strict": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "state": {
+              "properties": {
+                "relaxed": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "strict": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "title": {
+              "properties": {
+                "strict": {
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "weight": {
+              "properties": {
+                "relaxed": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "search": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "strict": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "search": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tld": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "url": {
+          "type": "string",
+          "fields": {
+            "raw": {
+              "index": "not_analyzed",
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "settings": {
+    "index": {
+      "creation_date": "1486591332105",
+      "number_of_shards": "10",
+      "number_of_replicas": "0",
+      "uuid": "d10DIkVkTpSKpGhxzxQzqg",
+      "version": {
+        "created": "2040199"
+      }
+    }
+  }
+}
