@@ -16,7 +16,7 @@ def load_json_file(file_name):
 
 
 def jl_file_iterator(file):
-    with codecs.open(file, 'r', 'utf-8') as f:
+    with codecs.open(file, 'r') as f:
         for line in f:
             document = json.loads(line)
             yield document
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     # Init the extractors
     content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL', 'TABLE']
     data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color']
-    extraction_classifiers = ['city', 'ethnicity', 'hair-color']
+    extraction_classifiers = ['city', 'ethnicity', 'hair-color', 'name', 'eye-color']
     properties = load_json_file(properties_file)
 
     # Initialize only requires extractors
