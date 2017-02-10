@@ -195,7 +195,7 @@ class ProcessExtractor(Extractor):
         age_extracor_init,
         city_dictionary_extractor_init,
         hair_color_dictionary_extractor_init,
-        name_dictionary_extractor_init
+        name_dictionary_extractor_init,
         ethnicities_dictionary_extractor_init
     ]
 
