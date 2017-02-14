@@ -157,8 +157,9 @@ class ProcessExtractor(Extractor):
   """ Class to process the document - Extend functions from Extractor class """
   def __init__(self, content_extractors, data_extractors, properties=None, landmark_rules=None):
     self.content_extractors = self.__initialize(content_extractors)
-    self.data_extractors = self.__get_data_extractor(data_extractors, properties)
     self.landmark_rules = landmark_rules
+    self.data_extractors = self.__get_data_extractor(data_extractors, properties)
+    
 
   def __initialize(self, extractors_selection, type_filter=None):
     """ Initialize content extractors """
