@@ -60,7 +60,7 @@ if __name__ == "__main__":
     # Init the extractors
     content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL']
     data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color', 'landmark', 'name']
-    extraction_classifiers = ['city', 'ethnicity', 'hair-color', 'name', 'eye-color']
+    extraction_classifiers = ['city', 'ethnicity', 'hair_color', 'name', 'eye-color']
     properties = load_json_file(properties_file)
 
     # Initialize only requires extractors
