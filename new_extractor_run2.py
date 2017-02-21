@@ -68,10 +68,6 @@ if __name__ == "__main__":
     # Initialize the ILP engine
     # ilp_processor = ProcessILP(properties)
 
-    # Build tree from raw content
-    # get all processors for root extractors
-    # tree_eps = pe.buildTreeFromHtml()
-
     o = codecs.open(output_file, 'w', 'utf-8')
     i = 1
     for jl in jl_file_iterator(input_path):
@@ -84,42 +80,12 @@ if __name__ == "__main__":
         tree_inputs = {'raw_content': jl['raw_content']}
         result_doc = pe.buildTreeFromHtml(jl, tree_inputs, levelKey='extractors', jsonPath=False)
         time_taken = time.time() - start_time
-        print "Time for content: ", time_taken
+        print "Total time for content(Readability + table): ", time_taken
 
-        # print result_doc.keys()
-        # sys.exit()
-        # result_doc = pe.execute_processor_chain(jl, tree_eps)
-        # result_doc['raw_content'] = "..."
         start_time_mid = time.time()
         result_doc = pe.buildTokensAndDataExtractors(result_doc)
         time_taken = time.time() - start_time_mid
-        print "Time for token and data extractors: ", time_taken
-
-        # # Build tokens for root extractors
-        # print "Building and running tokenizer extractors..."
-        # eps = pe.buildTokens(result_doc)
-        # result_doc = pe.execute_processor_chain(result_doc, eps)
-        # print "Storing simple tokens from crf tokens..."
-        # result_doc = pe.buildSimpleTokensFromStructured(result_doc)
-
-        # print "Building data extractors..."
-        # eps = pe.buildDataExtractors(result_doc)
-        # print "Running data extractors..."
-        # result_doc = pe.execute_processor_chain(result_doc, eps)
-        # print "Done"
-
-        # print "Building data extractors for tables..."
-        # eps = pe.buildDataExtractorsForTable(result_doc)
-        # print "Running data extractors..."
-        # result_doc = pe.execute_processor_chain(result_doc, eps)
-        # print "Done"
-
-        # # annotate
-        # print "Annotating tokens and data extractors..."
-        # result_doc = pe.anotateDocTokens(result_doc)
-
-        # print "Annotating tokens and data extractors for table..."
-        # result_doc = pe.anotateDocTokens(result_doc, type='Table')
+        print "Total time for tokenizing, data extractors and annotation: ", time_taken
 
         # Classifying the extractions using their context and appending the probabilities
         # print "Classifying the extractions..."
