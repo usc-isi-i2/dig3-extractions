@@ -18,7 +18,9 @@ class ProcessILP():
     self.ilp_formulation = ilp_extractions.ILPFormulation({
     'city-country':properties['city_country'],
     'city-state':properties['city_state'],
-    'state-country': properties['state_country']
+    'state-country': properties['state_country'],
+    'city-alt': properties['city_alt'],
+    'city-all': properties['city_all']  
     })
 
   def run_ilp(self, doc):
