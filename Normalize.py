@@ -23,7 +23,6 @@ class N(object):
 
     @staticmethod
     def clean_age(x, lower_bound=18, upper_bound=60):
-        """Return the clean age"""
         stripped = x.strip().lower()
         if '-' in stripped:
             """take only first value of any range"""
@@ -174,43 +173,35 @@ class N(object):
                         lb = float(lb)
                     except ValueError, e:
                         lb = 0
-                    # return sanityCheck(nearest2(lb_to_kg(int(stone*14+lb))))
                     # no binning
                     return sanityCheck(lb_to_kg(int(stone * 14 + lb)))
                 lb = cleaned.strip('s')
                 # now try for just pounds
                 if lb.endswith("lb"):
-                    # return sanityCheck(nearest2(lb_to_kg(int(float(lb.strip('lb'))))))
                     # no binning
                     return sanityCheck(lb_to_kg(int(float(lb.strip('lb')))))
                 if lb.endswith('pound'):
-                    # return sanityCheck(nearest2(lb_to_kg(int(float(lb.strip('pound'))))))
                     # no binning
                     return sanityCheck(lb_to_kg(int(float(lb.strip('pound')))))
                 # now kg
                 kg = cleaned.strip('s')
                 if kg.endswith("kg"):
-                    # return sanityCheck(nearest2(int(float(kg.strip('kg')))))
                     # no binning
                     return sanityCheck(int(float(kg.strip('kg'))))
                 if kg.endswith("kilo"):
-                    # return sanityCheck(nearest2(int(float(kg.strip('kilo')))))
                     # no binning
                     return sanityCheck(int(float(kg.strip('kilo'))))
                 if kg.endswith('kilogram'):
-                    # return sanityCheck(nearest2(int(float(kg.strip('kilogram')))))
                     # no binning
                     return sanityCheck(int(float(kg.strip('kilogram'))))
                 # now assume number sans unit
                 num = int(float(cleaned))
                 if num < 90:
                     # assume kg
-                    # return sanityCheck(nearest2(num))
                     # no binning
                     return float(sanityCheck(num))
                 else:
                     # assume lb
-                    # return sanityCheck(nearest2(lb_to_kg(num)))
                     # no binning
                     return float(sanityCheck(lb_to_kg(num)))
 
