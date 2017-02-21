@@ -4,6 +4,7 @@ from tldextract import tldextract
 import codecs
 import os
 import sys
+import pprint
 import re
 from digReadabilityExtractor.readability_extractor import ReadabilityExtractor
 # from digExtractor.extractor_processor import ExtractorProcessor
@@ -17,7 +18,49 @@ from digTableExtractor.table_extractor import TableExtractor
 from digExtractor.extractor_processor import ExtractorProcessor
 from digLandmarkExtractor.get_landmark_extractor_processors import get_multiplexing_landmark_extractor_processor
 from landmark_extractor.extraction.Landmark import RuleSet
+from digRegexExtractor.regex_extractor import RegexExtractor
+from digExtractor.extractor import Extractor as SuperExtractor
 # from digTokenizerExtractor.tokenizer_extractor import TokenizerExtractor
+
+"""This is just for reference
+inferlink_field_names = [
+                         {'name': ['inferlink_name']},
+                         {'posting-date': ['inferlink_posting-date', 'inferlink_posting-date-2',
+                                           'inferlink_posting-date-1']},
+                         {'location': ['inferlink_city', 'inferlink_state','inferlink_country', 'inferlink_location',
+                                       'inferlink_location-1', 'inferlink_location-2','inferlink_location-3']},
+                         {'phone': ['inferlink_phone', 'inferlink_local-phone', 'inferlink_phone-1']},
+                         {'description': ['inferlink_description', 'inferlink_description-1','inferlink_description-2',
+                                          'inferlink_description-3','inferlink_description-4']},
+                         {'age': ['inferlink_age', 'inferlink_age-1', 'inferlink_age-2']},
+                         {'ethnicity': ['inferlink_ethnicity']},
+                         {'hair_color': ['inferlink_hair-color']},
+                         {'weight': ['inferlink_weight']},
+                         {'price': ['inferlink_price','inferlink_price-1', 'inferlink_price-2', 'inferlink_price-3']},
+                         {'height': ['inferlink_height']},
+                         {'eye_color': ['inferlink_eye-color']},
+                         {'gender': ['inferlink_gender']}
+                         ]
+"""
+inferlink_data_fields = {
+                         'name': ['inferlink_name'],
+                         'posting-date': ['inferlink_posting-date', 'inferlink_posting-date-2',
+                                            'inferlink_posting-date-1'],
+                         'location': ['inferlink_location', 'inferlink_location-1',
+                                       'inferlink_location-2','inferlink_location-3'],
+                         'city': ['inferlink_city'],
+                         'state': ['inferlink_state'],
+                         'country': ['inferlink_country'],
+                         'phone': ['inferlink_phone'], #, 'inferlink_local-phone', 'inferlink_phone-1'],
+                         'age': ['inferlink_age', 'inferlink_age-1', 'inferlink_age-2'],
+                         'ethnicity': ['inferlink_ethnicity'],
+                          'hair_color': ['inferlink_hair-color'],
+                         'weight': ['inferlink_weight'],
+                          'price': ['inferlink_price','inferlink_price-1', 'inferlink_price-2', 'inferlink_price-3'],
+                         'height': ['inferlink_height'],
+                          'eye_color': ['inferlink_eye-color'],
+                         'gender': ['inferlink_gender']
+                         }
 
 
 fields_to_remove = ["crawl_data", "extracted_metadata"]
@@ -27,12 +70,18 @@ name_filter_regex = re.compile('[a-z].*[a-z]')
 readability_extractor_init = ReadabilityExtractor().set_metadata({'type': 'readability_high_recall'})
 readability_extractor_rc_init = ReadabilityExtractor().set_recall_priority(False).set_metadata({'type': 'readability_low_recall'})
 table_extractor_init = TableExtractor().set_metadata({'type': 'table'})
-
-
 tokenizer_extractor = TokenizerExtractor(recognize_linebreaks=True, create_structured_tokens=True).set_metadata({'extractor': 'crf_tokenizer'})
 # init sub root extractors
 phone_extractor_init = PhoneExtractor().set_metadata({'extractor': 'phone', 'semantic_type': 'phone', 'input_type': ['tokens']}).set_source_type('text')
 age_extracor_init = get_age_regex_extractor().set_metadata({'semantic_type': 'age', 'input_type': ['text']}).set_include_context(True)
+"""setup a title extractor to get title from html"""
+html_title_regex = re.compile(r'<title>(.*?)</title>', flags=re.IGNORECASE)
+
+title_regex_extractor = RegexExtractor() \
+    .set_regex(html_title_regex) \
+    .set_metadata({'extractor': 'title_regex', 'type': 'title'}) \
+    .set_include_context(True)
+
 
 city_dictionary_extractor_init = DictionaryExtractor() \
     .set_ngrams(3) \
@@ -70,8 +119,33 @@ hair_color_dictionary_extractor_init = DictionaryExtractor() \
         'properties_key': 'haircolor',  # !Important
     }) \
     .set_include_context(True)
-# city extractor
 
+class LambdaExtractor(SuperExtractor):
+
+    def __init__(self, x):
+        super(LambdaExtractor, self).__init__()
+        self.renamed_input_fields = x + '_x'
+        self.metadata = {}
+
+    def extract(self, doc):
+        return self.f(doc[self.renamed_input_fields])
+
+    def get_metadata(self):
+        return self.metadata
+
+    def set_metadata(self, metadata):
+        self.metadata = metadata
+        return self
+
+    def get_renamed_input_fields(self):
+        return self.renamed_input_fields
+
+    def set_extract_function(self, f):
+        self.f = f
+        return self
+
+
+pp = pprint.PrettyPrinter(indent=4)
 
 class Extractor(object):
   """A simple data structure for initializing the extractor and helper functions for processing
@@ -135,7 +209,8 @@ class Extractor(object):
 content_extractors = {
     'READABILITY_HIGH_RECALL': Extractor(readability_extractor_init, 'raw_content', 'extractors.content_relaxed.text'),
     'READABILITY_LOW_RECALL': Extractor(readability_extractor_rc_init, 'raw_content', 'extractors.content_strict.text'),
-    'TABLE': Extractor(table_extractor_init, 'raw_content', 'extractors.tables.text')
+    'TABLE': Extractor(table_extractor_init, 'raw_content', 'extractors.tables.text'),
+    'TITLE': Extractor(title_regex_extractor, 'raw_content', 'extractors.content_strict.title')
 }
 
 """ ************** END INTIALIZATION ******************  """
@@ -144,9 +219,27 @@ content_extractors = {
 class ProcessExtractor(Extractor):
   """ Class to process the document - Extend functions from Extractor class """
   def __init__(self, content_extractors, data_extractors, properties=None, landmark_rules=None):
+    self.landmark_rules = landmark_rules
+    self.landmark = None
+    if self.landmark_rules:
+        landmark_extractor_init = None
+        rule_sets = dict()
+        for key, value in self.landmark_rules.iteritems():
+            rule_sets[key] = RuleSet(value)
+        landmark_extractor_init = get_multiplexing_landmark_extractor_processor(rule_sets,
+                                                                 ['raw_content', 'tld'],
+                                                                 lambda tld: tld,
+                                                                 None,
+                                                                 True,
+                                                                 metadata={
+                                                                    'extractor': 'landmark',
+                                                                    'semantic_type': 'landmark'
+                                                                    })
+        if landmark_extractor_init:
+            self.landmark = landmark_extractor_init
     self.content_extractors = self.__initialize(content_extractors)
     self.data_extractors = self.__get_data_extractor(data_extractors, properties)
-    self.landmark_rules = landmark_rules
+
 
   def __initialize(self, extractors_selection, type_filter=None):
     """ Initialize content extractors """
@@ -163,21 +256,6 @@ class ProcessExtractor(Extractor):
     """ Initialize all data extractors and return only extractors that are included
         in the execution request chain
     """
-    landmark_extractor_init = None
-    if self.landmark_rules:
-        rule_sets = dict()
-        for key, value in self.landmark_rules.iteritems():
-            rule_sets[key] = RuleSet(value)
-
-        landmark_extractor_init = get_multiplexing_landmark_extractor_processor(rule_sets,
-                                                                 ['raw_content', 'tld'],
-                                                                 lambda tld: tld,
-                                                                 None,
-                                                                 True).set_metadata({
-                                                                    'extractor': 'landmark_extractor',
-                                                                    'semantic_type': 'landmark'
-                                                                })
-
     data_extractors = [
         phone_extractor_init,
         age_extracor_init,
@@ -200,9 +278,6 @@ class ProcessExtractor(Extractor):
 
       if metadata['semantic_type'] in sub:
         res.append(extractor)
-
-    if 'landmark' in sub and landmark_extractor_init:
-        res.append(landmark_extractor_init)
     return res
 
   def buildTreeFromHtml(self, tokenizer=False):
@@ -249,8 +324,44 @@ class ProcessExtractor(Extractor):
         ep.append(token_ep)
     return ep
 
+  @staticmethod
+  def process_inferlink_fields(doc):
+    path = 'extractors.content_strict.data_extractors'
+    for key in inferlink_data_fields.keys():
+        # print key
+        inferlink_fields = inferlink_data_fields[key]
+        for field in inferlink_fields:
+            if field in doc:
+                # print "BEFORE"
+                # pp.pprint(doc['extractors']['content_strict']['data_extractors'])
+                # print field
+                #print doc[field][0]['result']['value']
+                print "Adding %s to %s" % (field, key)
+                # print path + "." + key
+                identity_extractor = LambdaExtractor(field).set_extract_function(lambda x: x) \
+                    .set_metadata({'extractor': 'inferlink', 'input_type': ['text']})
+                identity_processor = ExtractorProcessor()\
+                          .set_input_fields(field + "[*].result.value")\
+                          .set_output_fields(path + "." + key).set_extractor(identity_extractor)
+                # print identitity_processor.get_extractor().extract(doc[field][0]['result']['value'])
+                doc = identity_processor.extract(doc)
+                if identity_processor is not None:
+                    identity_processor = None
+
+                # print "AFTER"
+                # pp.pprint(doc['extractors']['content_strict']['data_extractors'])
+
+                # try:
+                #     print doc['extractors']['content_strict']['data_extractors'][key]
+                # except:
+                #     pass
+    return doc
+
+
   def buildDataExtractors(self, doc):
     ep = []
+    if self.landmark:
+        ep.append(self.landmark)
     for extractor in self.data_extractors:
       metadata = extractor.get_metadata()
       inputs = metadata['input_type']

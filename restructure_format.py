@@ -1,6 +1,7 @@
 import json
 from optparse import OptionParser
 import codecs
+from Normalize import N
 
 SEM_TYPES = 'semantic_types'
 SEM_TYPE = 'semantic_type'
@@ -10,7 +11,7 @@ HAIR_C = 'hair_color'
 ETHNICITY = 'ethnicity'
 CITY = 'city'
 FIELDS = 'fields'
-
+probability_threshold = 0.5
 
 def update_semantic_types_token(token, offset):
     sem_types = token[SEM_TYPE]
@@ -58,13 +59,16 @@ def get_value_sem_type(tokens):
                         obj = dict()
                         obj['probability'] = sem_t['probability']
                         obj['value'] = val.strip()
+                        if 'selected' in sem_t:
+                            obj['selected'] = True
                         semantic_type_values[field].append(obj)
                     tokens[i][SEM_TYPE][j]['read'] = True
     for key in semantic_type_values.keys():
         semantic_type_values[key].sort(key=lambda x: x['probability'], reverse=True)
-        values_only = (x['value'] for x in semantic_type_values[key])
-        semantic_type_values[key] = list(values_only)
+        # values_only = (x['value'] for x in semantic_type_values[key])
+        # semantic_type_values[key] = list(values_only)
     return semantic_type_values
+
 
 def create_field_objects(values, field_name):
     if isinstance(values, list):
@@ -75,48 +79,139 @@ def create_field_objects(values, field_name):
     else:
         return create_field_object(values, field_name)
 
+
+def if_exists(values, value_to_add):
+    return value_to_add in list(x['key'] for x in values)
+
+
 def create_field_object(value, field_name):
     # TODO  according to field name, create different objects
     out = dict()
-    out['key'] = value
-    out['name'] = value
+    # if field_name == 'city':
+    #     out['key'] = value['value'] + ":" + value['state'] + ":" + value['country']
+    #     out['name'] = value['value']
+    # else:
+    if field_name == 'title' or field_name == 'description':
+        out['name'] = value['value']
+    elif field_name == 'posting-date':
+        d = N.clean_posting_date(value['value'])
+        if d:
+            out['key'] = d
+            out['name'] = d
+        else:
+            out['name'] = value['value']
+    else:
+        out['key'] = value['value']
+        out['name'] = value['value']
     return out
 
-def consolidate_semantic_types(doc):
-    strict_semantic_types = None
-    relaxed_semantic_types = None
-    if 'extractors' in doc and 'content_strict' in doc['extractors'] and 'crf_tokens' in doc['extractors']['content_strict']:
-        strict_crf_tokens = doc['extractors']['content_strict']['crf_tokens'][0]['result'][0]['value']
-        strict_semantic_types = get_value_sem_type(strict_crf_tokens)
-    if 'extractors' in doc and 'content_relaxed' in doc['extractors'] and 'crf_tokens' in doc['extractors']['content_relaxed']:
-        relaxed_crf_tokens = doc['extractors']['content_relaxed']['crf_tokens'][0]['result'][0]['value']
-        relaxed_semantic_types = get_value_sem_type(relaxed_crf_tokens)
 
+def add_objects_to_semantic_types_for_gui(obj_semantic_types, semantic_type, values, value_type):
+    if semantic_type not in obj_semantic_types:
+        obj_semantic_types[semantic_type] = dict()
+    if 'strict' not in obj_semantic_types[semantic_type]:
+        obj_semantic_types[semantic_type]['strict'] = list()
+    if 'relaxed' not in obj_semantic_types[semantic_type]:
+        obj_semantic_types[semantic_type]['relaxed'] = list()
+
+    if value_type == 'strict':
+        # print values
+        for val in values:
+            if 'selected' in val or ('probability' in val and val['probability'] >= probability_threshold) or len(obj_semantic_types[semantic_type]['strict']) == 0:
+                if not if_exists(obj_semantic_types[semantic_type]['strict'], val['value']):
+                    obj_semantic_types[semantic_type]['strict'].append(create_field_objects(val, semantic_type))
+            else:
+                # print obj_semantic_types[semantic_type]['relaxed']
+                # print val
+                if not if_exists(obj_semantic_types[semantic_type]['relaxed'], val['value']):
+                    obj_semantic_types[semantic_type]['relaxed'].append(create_field_objects(val, semantic_type))
+    elif value_type == 'relaxed':
+        for val in values:
+            if not if_exists(obj_semantic_types[semantic_type]['relaxed'], val['value']):
+                obj_semantic_types[semantic_type]['relaxed'].extend(create_field_objects(values, semantic_type))
+    return obj_semantic_types
+
+
+def consolidate_extractor_values(extraction):
+    out = list()
+    for values in extraction:
+        result = values['result']
+        if isinstance(result, list):
+            out.extend(result)
+        else:
+            out.append(result)
+    return out
+
+
+def consolidate_semantic_types(doc):
     semantic_type_objs = dict()
 
-    if strict_semantic_types:
-        for key in strict_semantic_types.keys():
-            field_val = strict_semantic_types[key]
-            print field_val
-            if key not in semantic_type_objs:
-                semantic_type_objs[key] = dict()
-            if 'strict' not in semantic_type_objs[key]:
-                semantic_type_objs[key]['strict'] = list()
-            if 'relaxed' not in semantic_type_objs[key]:
-                semantic_type_objs[key]['relaxed'] = list()
-            if len(semantic_type_objs[key]['strict']) == 0:
-                semantic_type_objs[key]['strict'].append(create_field_objects(field_val[0], key))
-            else:
-                if len(field_val) > 1:
-                    semantic_type_objs[key]['relaxed'].extend(field_val[1:], key)
-    if relaxed_semantic_types:
-        for key in relaxed_semantic_types.keys():
-            field_val = relaxed_semantic_types[key]
-            if key not in semantic_type_objs:
-                semantic_type_objs[key] = dict()
-            if 'relaxed' not in semantic_type_objs[key]:
-                semantic_type_objs[key]['relaxed'] = list()
-            semantic_type_objs[key]['relaxed'].extend(create_field_objects(field_val, key))
+    if 'extractors' in doc:
+        extractors = doc['extractors']
+        if 'content_strict' in extractors:
+            content_strict = extractors['content_strict']
+            if 'crf_tokens' in content_strict:
+                strict_crf_tokens = content_strict['crf_tokens'][0]['result'][0]['value']
+                strict_semantic_types = get_value_sem_type(strict_crf_tokens)
+                if strict_semantic_types:
+                    for key in strict_semantic_types.keys():
+                        semantic_type_objs = add_objects_to_semantic_types_for_gui(semantic_type_objs, key,
+                                                                                   strict_semantic_types[key], 'strict')
+            if 'data_extractors' in content_strict:
+                de_strict = content_strict['data_extractors']
+                for key in de_strict.keys():
+                    extraction = consolidate_extractor_values(de_strict[key])
+                    # print key
+                    # print doc['doc_id']
+                    # print extraction
+                    semantic_type_objs = add_objects_to_semantic_types_for_gui(semantic_type_objs, key, extraction, 'strict')
+
+            title = None
+            if 'title' in content_strict:
+                title = content_strict['title'][0]['result'][0]
+            elif 'inferlink_title' in doc:
+                title = doc['inferlink_title'][0]['result']
+            if title:
+                # print title
+                title = [title]
+                semantic_type_objs = add_objects_to_semantic_types_for_gui(semantic_type_objs, 'title', title,
+                                                                           'strict')
+                semantic_type_objs = add_objects_to_semantic_types_for_gui(semantic_type_objs, 'title', title,
+                                                                           'relaxed')
+            description = None
+            if 'inferlink_description' in doc:
+                description = doc['inferlink_description'][0]['result']
+            elif 'text' in content_strict:
+                description = content_strict['text'][0]['result']
+            if description:
+                description = [description]
+                semantic_type_objs = add_objects_to_semantic_types_for_gui(semantic_type_objs, 'description', description,
+                                                                           'strict')
+
+        if 'content_relaxed' in extractors:
+            content_relaxed = extractors['content_relaxed']
+            if 'crf_tokens' in content_relaxed:
+                relaxed_crf_tokens = content_relaxed['crf_tokens'][0]['result'][0]['value']
+                relaxed_semantic_types = get_value_sem_type(relaxed_crf_tokens)
+                if relaxed_semantic_types:
+                    for key in relaxed_semantic_types.keys():
+                        semantic_type_objs = add_objects_to_semantic_types_for_gui(semantic_type_objs, key,
+                                                                                   relaxed_semantic_types[key],
+                                                                                   'relaxed')
+            if 'data_extractors' in content_relaxed:
+                de_relaxed = content_relaxed['data_extractors']
+                for key in de_relaxed.keys():
+                    extraction = consolidate_extractor_values(de_relaxed[key])
+                    semantic_type_objs = add_objects_to_semantic_types_for_gui(semantic_type_objs, key, extraction, 'relaxed')
+
+            description = None
+            if 'text' in content_relaxed:
+                description = content_relaxed['text'][0]['result']
+            if description:
+                description = [description]
+                semantic_type_objs = add_objects_to_semantic_types_for_gui(semantic_type_objs, 'description', description,
+                                                                           'relaxed')
+
     doc[FIELDS] = semantic_type_objs
     return doc
 
