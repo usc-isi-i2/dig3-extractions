@@ -1,0 +1,72 @@
+{
+  "age": {
+    "data_type": "int",
+    "range": {
+      "lower_bound": 18,
+      "upper_bound": 60
+    },
+    "function": {
+      "name": "clean_age",
+      "key": "clean_age"
+    }
+  },
+  "height": {
+    "data_type": "string",
+    "range": {
+      "lower_bound": 121,
+      "upper_bound": 214
+    },
+    "function": {
+      "name": "clean_height",
+      "key": "clean_height",
+      "search": "convert_height_all_units"
+    }
+  },
+  "weight": {
+    "data_type": "string",
+    "range": {
+      "lower_bound": 40,
+      "upper_bound": 150
+    },
+    "function": {
+      "name": "clean_weight",
+      "key": "clean_weight",
+      "search": "convert_weight_all_units"
+    }
+  },
+  "name": {
+    "data_type": "string",
+    "function": {
+      "name": "clean_name",
+      "key": "clean_name"
+    }
+  },
+  "posting-date": {
+    "data_type": "string",
+    "function": {
+      "name": "clean_posting_date",
+      "key": "clean_posting_date"
+    }
+  },
+  "ethnicity": {
+    "data_type": "string",
+    "function": {
+      "name": "clean_ethnicity",
+      "key": "clean_ethnicity"
+    }
+  },
+  "eye_color": {
+    "data_type": "string",
+    "function": {
+      "name": "clean_eye_color",
+      "key": "clean_eye_color"
+    }
+  },
+  "hair_color": {
+    "data_type": "string",
+    "function": {
+      "name": "clean_hair_color",
+      "key": "clean_hair_color"
+    }
+  }
+}
