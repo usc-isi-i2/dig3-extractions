@@ -7,7 +7,7 @@ import fnmatch
 from optparse import OptionParser
 from initExtractors import ProcessExtractor
 from initClassifiers import ProcessClassifier
-# from initILP import ProcessILP
+from initILP import ProcessILP
 
 
 def load_json_file(file_name):
@@ -16,7 +16,7 @@ def load_json_file(file_name):
 
 
 def jl_file_iterator(file):
-    with codecs.open(file, 'r', 'utf-8') as f:
+    with codecs.open(file, 'r') as f:
         for line in f:
             document = json.loads(line)
             yield document
@@ -52,20 +52,25 @@ if __name__ == "__main__":
         print "Usage error: python run.py <input> <output> <properties>"
         sys.exit()
 
+    landmark_rules_file = c_options.landmarkRules
+    landmark_rules = None
+    if landmark_rules_file:
+        landmark_rules = json.load(codecs.open(landmark_rules_file, 'r', 'utf-8'))
+
     # Init the extractors
-    content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL', 'TABLE']
-    data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color']
-    extraction_classifiers = ['city', 'ethnicity', 'hair-color']
+    content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL']
+    data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color', 'landmark', 'name']
+    extraction_classifiers = ['city', 'ethnicity', 'hair_color', 'name', 'eye-color']
     properties = load_json_file(properties_file)
 
     # Initialize only requires extractors
-    pe = ProcessExtractor(content_extractors, data_extractors, properties)
+    pe = ProcessExtractor(content_extractors, data_extractors, properties, landmark_rules=landmark_rules)
 
     # Initialize the classifiers
     classifier_processor = ProcessClassifier(extraction_classifiers)
 
     # Initialize the ILP engine
-    # ilp_processor = ProcessILP(properties)
+    ilp_processor = ProcessILP(properties)
 
     # Build tree from raw content
     # get all processors for root extractors
@@ -79,14 +84,13 @@ if __name__ == "__main__":
 
         result_doc = ''
         result_doc = pe.execute_processor_chain(jl, tree_eps)
-        result_doc['raw_content'] = "..."
 
         # Build tokens for root extractors
         print "Building and running tokenizer extractors..."
         eps = pe.buildTokens(result_doc)
         result_doc = pe.execute_processor_chain(result_doc, eps)
         print "Storing simple tokens from crf tokens..."
-        result_doc = pe.buildSimpleTokensFromStructured(result_doc)
+        result_doc = pe.buildSimpleTokensFromStructured(pe.add_tld(result_doc))
 
         print "Building data extractors..."
         eps = pe.buildDataExtractors(result_doc)
@@ -112,8 +116,8 @@ if __name__ == "__main__":
         result_doc = classifier_processor.classify_extractions(result_doc)
 
         # Formulating and Solving the ILP for the extractions
-        # print "Formulating and Solving the ILP"
-        # result_doc = ilp_processor.run_ilp(result_doc)        
+        print "Formulating and Solving the ILP"
+        result_doc = ilp_processor.run_ilp(result_doc)        
 
         print "Done.."
         print '*' * 20, " End ", '*' * 20

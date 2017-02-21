@@ -12,16 +12,11 @@ from digPhoneExtractor.phone_extractor import PhoneExtractor
 from digAgeRegexExtractor.age_regex_helper import get_age_regex_extractor
 from digDictionaryExtractor.populate_trie import populate_trie
 from digDictionaryExtractor.dictionary_extractor import DictionaryExtractor
-# from digTableExtractor.table_extractor import TableExtractor
 from digTokenizerExtractor.tokenizer_extractor import TokenizerExtractor
-
-
-sys.path.insert(0, os.getcwd() + '/dig-table-extractor')
-sys.path.insert(0, os.getcwd() + '/dig-extractor1')
-
-# sys.path.insert(0, os.getcwd() + '/dig-tokenizer-extractor')
 from digTableExtractor.table_extractor import TableExtractor
 from digExtractor.extractor_processor import ExtractorProcessor
+from digLandmarkExtractor.get_landmark_extractor_processors import get_multiplexing_landmark_extractor_processor
+from landmark_extractor.extraction.Landmark import RuleSet
 # from digTokenizerExtractor.tokenizer_extractor import TokenizerExtractor
 
 
@@ -49,6 +44,18 @@ city_dictionary_extractor_init = DictionaryExtractor() \
         'input_type': ['tokens'],
         'type': 'dictionary',  # !Important
         'properties_key': 'cities',  # !Important
+    }) \
+    .set_include_context(True)
+
+name_dictionary_extractor_init = DictionaryExtractor() \
+    .set_pre_filter(lambda x: name_filter_regex.match(x)) \
+    .set_pre_process(lambda x: x.lower()) \
+    .set_metadata({
+        'extractor': 'dig_name_dictionary_extractor',
+        'semantic_type': 'name',
+        'input_type': ['tokens'],
+        'type': 'dictionary',
+        'properties_key': 'names_low_precision'
     }) \
     .set_include_context(True)
 
@@ -148,9 +155,11 @@ content_extractors = {
 
 class ProcessExtractor(Extractor):
   """ Class to process the document - Extend functions from Extractor class """
-  def __init__(self, content_extractors, data_extractors, properties=None):
+  def __init__(self, content_extractors, data_extractors, properties=None, landmark_rules=None):
     self.content_extractors = self.__initialize(content_extractors)
+    self.landmark_rules = landmark_rules
     self.data_extractors = self.__get_data_extractor(data_extractors, properties)
+    
 
   def __initialize(self, extractors_selection, type_filter=None):
     """ Initialize content extractors """
@@ -167,11 +176,28 @@ class ProcessExtractor(Extractor):
     """ Initialize all data extractors and return only extractors that are included
         in the execution request chain
     """
+    landmark_extractor_init = None
+    if self.landmark_rules:
+        rule_sets = dict()
+        for key, value in self.landmark_rules.iteritems():
+            rule_sets[key] = RuleSet(value)
+
+        landmark_extractor_init = get_multiplexing_landmark_extractor_processor(rule_sets,
+                                                                 ['raw_content', 'tld'],
+                                                                 lambda tld: tld,
+                                                                 None,
+                                                                 True).set_metadata({
+                                                                    'extractor': 'landmark_extractor',
+                                                                    'semantic_type': 'landmark'
+                                                                })
+
     data_extractors = [
         phone_extractor_init,
         age_extracor_init,
         city_dictionary_extractor_init,
-        hair_color_dictionary_extractor_init
+        hair_color_dictionary_extractor_init,
+        name_dictionary_extractor_init,
+        ethnicities_dictionary_extractor_init
     ]
 
     res = []
@@ -188,6 +214,9 @@ class ProcessExtractor(Extractor):
 
       if metadata['semantic_type'] in sub:
         res.append(extractor)
+
+    if 'landmark' in sub and landmark_extractor_init:
+        res.append(landmark_extractor_init)
     return res
 
   def buildTreeFromHtml(self, tokenizer=False):
