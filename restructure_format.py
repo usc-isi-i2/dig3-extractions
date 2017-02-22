@@ -1,7 +1,7 @@
 import json
 from optparse import OptionParser
 import codecs
-from Normalize import N
+from Normalize import N as NO
 
 SEM_TYPES = 'semantic_types'
 SEM_TYPE = 'semantic_type'
@@ -70,43 +70,45 @@ def get_value_sem_type(tokens):
     return semantic_type_values
 
 
-def create_field_objects(values, field_name):
+def create_field_objects(values, field_name, normalize_conf, N):
     if isinstance(values, list):
         out = list()
         for val in values:
-            out.append(create_field_object(val, field_name))
+            out.append(create_field_object(val, field_name, normalize_conf, N))
         return out
     else:
-        return create_field_object(values, field_name)
+        return create_field_object(values, field_name, normalize_conf, N)
 
 
 def if_exists(values, value_to_add):
     return value_to_add in list(x['key'] for x in values)
 
 
-def create_field_object(value, field_name):
-    # TODO  according to field name, create different objects
+def create_field_object(value, field_name, normalize_conf, N):
+    print "%s: %s" % (field_name, value)
     out = dict()
-    # if field_name == 'city':
-    #     out['key'] = value['value'] + ":" + value['state'] + ":" + value['country']
-    #     out['name'] = value['value']
-    # else:
-    if field_name == 'title' or field_name == 'description':
-        out['name'] = value['value']
-    elif field_name == 'posting-date':
-        d = N.clean_posting_date(value['value'])
-        if d:
-            out['key'] = d
-            out['name'] = d
+    if field_name in normalize_conf:
+        f_conf = normalize_conf[field_name]
+        func = getattr(N, f_conf['function'])
+        if field_name == 'city':
+            o = func(value)
         else:
-            out['name'] = value['value']
-    else:
-        out['key'] = value['value']
-        out['name'] = value['value']
+            o = func(value['value'], f_conf)
+        if o:
+            print "Normalized output:", o
+            print "\n"
+            return o
+
+    out['key'] = value['value']
+    out['name'] = value['value']
+
+    print 'Not Normalized output: ', out
+    print "\n"
+
     return out
 
 
-def add_objects_to_semantic_types_for_gui(obj_semantic_types, semantic_type, values, value_type):
+def add_objects_to_semantic_types_for_gui(obj_semantic_types, semantic_type, values, value_type, normalize_conf, N):
     if semantic_type not in obj_semantic_types:
         obj_semantic_types[semantic_type] = dict()
     if 'strict' not in obj_semantic_types[semantic_type]:
@@ -117,18 +119,23 @@ def add_objects_to_semantic_types_for_gui(obj_semantic_types, semantic_type, val
     if value_type == 'strict':
         # print values
         for val in values:
-            if 'selected' in val or ('probability' in val and val['probability'] >= probability_threshold) or len(obj_semantic_types[semantic_type]['strict']) == 0:
+            if 'selected' in val \
+                    or ('probability' in val and val['probability'] >= probability_threshold) \
+                    or len(obj_semantic_types[semantic_type]['strict']) == 0:
                 if not if_exists(obj_semantic_types[semantic_type]['strict'], val['value']):
-                    obj_semantic_types[semantic_type]['strict'].append(create_field_objects(val, semantic_type))
+                    obj_semantic_types[semantic_type]['strict'].append(create_field_objects(val, semantic_type,
+                                                                                            normalize_conf, N))
             else:
                 # print obj_semantic_types[semantic_type]['relaxed']
                 # print val
                 if not if_exists(obj_semantic_types[semantic_type]['relaxed'], val['value']):
-                    obj_semantic_types[semantic_type]['relaxed'].append(create_field_objects(val, semantic_type))
+                    obj_semantic_types[semantic_type]['relaxed'].append(create_field_objects(val, semantic_type,
+                                                                                             normalize_conf, N))
     elif value_type == 'relaxed':
         for val in values:
             if not if_exists(obj_semantic_types[semantic_type]['relaxed'], val['value']):
-                obj_semantic_types[semantic_type]['relaxed'].extend(create_field_objects(values, semantic_type))
+                obj_semantic_types[semantic_type]['relaxed'].extend(create_field_objects(values, semantic_type,
+                                                                                         normalize_conf, N))
     return obj_semantic_types
 
 
@@ -143,7 +150,7 @@ def consolidate_extractor_values(extraction):
     return out
 
 
-def consolidate_semantic_types(doc):
+def consolidate_semantic_types(doc, normalize_conf, N):
     semantic_type_objs = dict()
 
     if 'extractors' in doc:
@@ -156,7 +163,8 @@ def consolidate_semantic_types(doc):
                 if strict_semantic_types:
                     for key in strict_semantic_types.keys():
                         semantic_type_objs = add_objects_to_semantic_types_for_gui(semantic_type_objs, key,
-                                                                                   strict_semantic_types[key], 'strict')
+                                                                                   strict_semantic_types[key],
+                                                                                   'strict', normalize_conf, N)
             if 'data_extractors' in content_strict:
                 de_strict = content_strict['data_extractors']
                 for key in de_strict.keys():
@@ -164,7 +172,8 @@ def consolidate_semantic_types(doc):
                     # print key
                     # print doc['doc_id']
                     # print extraction
-                    semantic_type_objs = add_objects_to_semantic_types_for_gui(semantic_type_objs, key, extraction, 'strict')
+                    semantic_type_objs = add_objects_to_semantic_types_for_gui(semantic_type_objs, key, extraction,
+                                                                               'strict', normalize_conf, N)
 
             title = None
             if 'title' in content_strict:
@@ -175,9 +184,9 @@ def consolidate_semantic_types(doc):
                 # print title
                 title = [title]
                 semantic_type_objs = add_objects_to_semantic_types_for_gui(semantic_type_objs, 'title', title,
-                                                                           'strict')
+                                                                           'strict', normalize_conf, N)
                 semantic_type_objs = add_objects_to_semantic_types_for_gui(semantic_type_objs, 'title', title,
-                                                                           'relaxed')
+                                                                           'relaxed', normalize_conf, N)
             description = None
             if 'inferlink_description' in doc:
                 description = doc['inferlink_description'][0]['result']
@@ -185,8 +194,8 @@ def consolidate_semantic_types(doc):
                 description = content_strict['text'][0]['result']
             if description:
                 description = [description]
-                semantic_type_objs = add_objects_to_semantic_types_for_gui(semantic_type_objs, 'description', description,
-                                                                           'strict')
+                semantic_type_objs = add_objects_to_semantic_types_for_gui(semantic_type_objs, 'description',
+                                                                           description, 'strict', normalize_conf, N)
 
         if 'content_relaxed' in extractors:
             content_relaxed = extractors['content_relaxed']
@@ -197,20 +206,21 @@ def consolidate_semantic_types(doc):
                     for key in relaxed_semantic_types.keys():
                         semantic_type_objs = add_objects_to_semantic_types_for_gui(semantic_type_objs, key,
                                                                                    relaxed_semantic_types[key],
-                                                                                   'relaxed')
+                                                                                   'relaxed', normalize_conf, N)
             if 'data_extractors' in content_relaxed:
                 de_relaxed = content_relaxed['data_extractors']
                 for key in de_relaxed.keys():
                     extraction = consolidate_extractor_values(de_relaxed[key])
-                    semantic_type_objs = add_objects_to_semantic_types_for_gui(semantic_type_objs, key, extraction, 'relaxed')
+                    semantic_type_objs = add_objects_to_semantic_types_for_gui(semantic_type_objs, key,
+                                                                               extraction, 'relaxed', normalize_conf, N)
 
             description = None
             if 'text' in content_relaxed:
                 description = content_relaxed['text'][0]['result']
             if description:
                 description = [description]
-                semantic_type_objs = add_objects_to_semantic_types_for_gui(semantic_type_objs, 'description', description,
-                                                                           'relaxed')
+                semantic_type_objs = add_objects_to_semantic_types_for_gui(semantic_type_objs, 'description',
+                                                                           description, 'relaxed', normalize_conf, N)
 
     doc[FIELDS] = semantic_type_objs
     return doc
@@ -221,12 +231,17 @@ if __name__ == "__main__":
     (c_options, args) = parser.parse_args()
     input_file = args[0]
     output_file = args[1]
+    normalize_conf_file = args[2]
+    hybrid_jaccard_conf_file = args[3]
+    hybrid_jaccard_config = json.load(codecs.open(hybrid_jaccard_conf_file, 'r'))
+    N_O = NO(hybrid_jaccard_config)
+    normalize_conf = json.load(codecs.open(normalize_conf_file, 'r', 'utf-8'))
 
     lines = codecs.open(input_file, 'r').readlines()
     o = codecs.open(output_file, 'w')
 
     for line in lines:
         x = json.loads(line)
-        o.write(json.dumps(consolidate_semantic_types(x)))
+        o.write(json.dumps(consolidate_semantic_types(x, normalize_conf, N_O)))
         o.write('\n')
     o.close()
