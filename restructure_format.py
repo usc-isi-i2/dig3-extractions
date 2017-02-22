@@ -99,7 +99,7 @@ def create_field_object(value, field_name, normalize_conf, N):
             print "\n"
             return o
 
-    out['key'] = value['value']
+    out['key'] = ''
     out['name'] = value['value']
 
     print 'Not Normalized output: ', out

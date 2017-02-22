@@ -19,8 +19,8 @@ class ProcessILP():
     'city-country':properties['city_country'],
     'city-state':properties['city_state'],
     'state-country': properties['state_country'],
-    'city-alt': properties['city_alt'],
-    'city-all': properties['city_all']  
+    'city_alt': properties['city_alt'],
+    'city_all': properties['city_all']
     })
 
   def run_ilp(self, doc):

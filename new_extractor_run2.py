@@ -7,8 +7,8 @@ import time
 import fnmatch
 from optparse import OptionParser
 from initExtractors2 import ProcessExtractor
-# from initClassifiers import ProcessClassifier
-# from initILP import ProcessILP
+from initClassifiers import ProcessClassifier
+from initILP import ProcessILP
 
 
 def load_json_file(file_name):
@@ -53,20 +53,25 @@ if __name__ == "__main__":
         print "Usage error: python run.py <input> <output> <properties>"
         sys.exit()
 
+    landmark_rules_file = c_options.landmarkRules
+    landmark_rules = None
+    if landmark_rules_file:
+        landmark_rules = json.load(codecs.open(landmark_rules_file, 'r', 'utf-8'))
+
     # Init the extractors
-    content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL', 'TABLE']
-    data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color', 'eye_color', 'name']
-    extraction_classifiers = ['city', 'ethnicity', 'hair-color']
+    content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL', 'TABLE', 'TITLE']
+    data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color', 'eye_color', 'name', 'landmark']
+    extraction_classifiers = ['city', 'ethnicity', 'hair_color', 'name', 'eye_color']
     properties = load_json_file(properties_file)
 
     # Initialize only requires extractors
-    pe = ProcessExtractor(content_extractors, data_extractors, properties)
+    pe = ProcessExtractor(content_extractors, data_extractors, properties, landmark_rules=landmark_rules)
 
     # Initialize the classifiers
-    # classifier_processor = ProcessClassifier(extraction_classifiers)
+    classifier_processor = ProcessClassifier(extraction_classifiers)
 
     # Initialize the ILP engine
-    # ilp_processor = ProcessILP(properties)
+    ilp_processor = ProcessILP(properties)
 
     o = codecs.open(output_file, 'w', 'utf-8')
     i = 1
@@ -87,13 +92,16 @@ if __name__ == "__main__":
         time_taken = time.time() - start_time_mid
         print "Total time for tokenizing, data extractors and annotation: ", time_taken
 
+        result_doc = pe.process_inferlink_fields(result_doc)
+
         # Classifying the extractions using their context and appending the probabilities
-        # print "Classifying the extractions..."
-        # result_doc = classifier_processor.classify_extractions(result_doc)
+        print "Classifying the extractions..."
+        result_doc = classifier_processor.classify_extractions(result_doc)
 
         # Formulating and Solving the ILP for the extractions
-        # print "Formulating and Solving the ILP"
-        # result_doc = ilp_processor.run_ilp(result_doc)        
+        print "Formulating and Solving the ILP"
+        result_doc = ilp_processor.run_ilp(result_doc)
+
         time_taken = time.time() - start_time
         print "Total Time: ", time_taken
         print "Done.."

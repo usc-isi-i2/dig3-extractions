@@ -20,7 +20,7 @@ from digLandmarkExtractor.get_landmark_extractor_processors import get_multiplex
 from landmark_extractor.extraction.Landmark import RuleSet
 from digRegexExtractor.regex_extractor import RegexExtractor
 from digExtractor.extractor import Extractor as SuperExtractor
-# from digTokenizerExtractor.tokenizer_extractor import TokenizerExtractor
+
 
 """This is just for reference
 inferlink_field_names = [
