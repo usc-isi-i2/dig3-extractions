@@ -316,10 +316,13 @@ class ProcessExtractor(Extractor):
         return doc
 
     def addTokenizedData(self, doc, matches, index, data):
-        temp = {'text': data['result']['value']}
-        crf_tokens = Extractor.execute_extractor(tokenizer_extractor, temp)
-        result = [{'result': {'value': crf_tokens}}]
-        doc = self.update_json(doc, matches, 'crf_tokens', result, index, parent=True)
+        crf_tokens = []
+        if data['result']['value']:
+            temp = {'text': data['result']['value']}
+            crf_tokens = Extractor.execute_extractor(tokenizer_extractor, temp)
+            print crf_tokens
+            result = [{'result': {'value': crf_tokens}}]
+            doc = self.update_json(doc, matches, 'crf_tokens', result, index, parent=True)
         return doc, crf_tokens
 
     def addSimpleTokenizedData(self, doc, matches, index, crf_tokens):
@@ -410,20 +413,22 @@ class ProcessExtractor(Extractor):
                     # step2 - build crf tokens
                     doc, crf_tokens = self.addTokenizedData(doc, table_matches, tIndex, data)
                     # step3 - build normal tokens
-                    doc, simple_tokens = self.addSimpleTokenizedData(doc, table_matches, tIndex, crf_tokens)
-                    # step4 - build data extractors
-                    doc, content = self.addDataExtractorValues(doc, table_matches, tIndex, data, simple_tokens)
-                    # step5 - annotate the data extractors to tokens
-                    doc, crf_tokens = self.addTokensWithAnnotation(doc, table_matches, tIndex, crf_tokens, content)
+                    if crf_tokens:
+                        doc, simple_tokens = self.addSimpleTokenizedData(doc, table_matches, tIndex, crf_tokens)
+                        # step4 - build data extractors
+                        doc, content = self.addDataExtractorValues(doc, table_matches, tIndex, data, simple_tokens)
+                        # step5 - annotate the data extractors to tokens
+                        doc, crf_tokens = self.addTokensWithAnnotation(doc, table_matches, tIndex, crf_tokens, content)
             else:
                 # step2 - build crf tokens
                 doc, crf_tokens = self.addTokenizedData(doc, matches, index, data)
                 # step3 - build normal tokens
-                doc, simple_tokens = self.addSimpleTokenizedData(doc, matches, index, crf_tokens)
-                # step4 - build data extractors
-                doc, content = self.addDataExtractorValues(doc, matches, index, data, simple_tokens)
-                # step5 - annotate the data extractors to tokens
-                doc, crf_tokens = self.addTokensWithAnnotation(doc, matches, index, crf_tokens, content)
+                if crf_tokens:
+                    doc, simple_tokens = self.addSimpleTokenizedData(doc, matches, index, crf_tokens)
+                    # step4 - build data extractors
+                    doc, content = self.addDataExtractorValues(doc, matches, index, data, simple_tokens)
+                    # step5 - annotate the data extractors to tokens
+                    doc, crf_tokens = self.addTokensWithAnnotation(doc, matches, index, crf_tokens, content)
         return doc
 
     @staticmethod
