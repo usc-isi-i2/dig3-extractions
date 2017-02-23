@@ -55,7 +55,8 @@ if __name__ == "__main__":
         landmark_rules = json.load(codecs.open(landmark_rules_file, 'r', 'utf-8'))
 
     # Init the extractors
-    content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL', 'TABLE', 'TITLE']
+    # content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL', 'TABLE', 'TITLE']
+    content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL', 'TITLE']
     data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color', 'landmark', 'name']
     extraction_classifiers = ['city', 'ethnicity', 'hair_color', 'name', 'eye_color']
     properties = load_json_file(properties_file)
@@ -112,6 +113,7 @@ if __name__ == "__main__":
 
         # Classifying the extractions using their context and appending the probabilities
         print "Classifying the extractions..."
+
         result_doc = classifier_processor.classify_extractions(result_doc)
 
         # Formulating and Solving the ILP for the extractions
@@ -120,3 +122,7 @@ if __name__ == "__main__":
 
         print "Done.."
         print '*' * 20, " End ", '*' * 20
+        o.write(json.dumps(result_doc) + '\n')
+        i += 1
+    o.close()
+

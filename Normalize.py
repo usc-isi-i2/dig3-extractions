@@ -26,6 +26,7 @@ class N(object):
 
     @staticmethod
     def clean_age(x, conf):
+        x = x['value']
         stripped = x.strip().lower()
         if '-' in stripped:
             """take only first value of any range"""
@@ -49,6 +50,7 @@ class N(object):
 
     @staticmethod
     def clean_name(x, conf):
+        x = x['value']
         name = N.replace_multiple_spaces_with_one(x).title()
         if N.sanity_check_values(name, conf) is not None:
             o = dict()
@@ -109,6 +111,7 @@ class N(object):
         :return: height in centimeters
         """
         centimeters = None
+        x = x['value']
         if isinstance(x, basestring):
             stripped = x.strip().lower()
             # take only first measurement of any range
@@ -162,7 +165,7 @@ class N(object):
 
         def lb_to_kg(lb):
             return float(lb) / 2.2
-
+        x = x['value']
         if isinstance(x, basestring):
             """In kg.unmarked weight < 90 is interpreted as kg, >=90 as lb"""
             x = str(x).strip().lower()
@@ -231,6 +234,7 @@ class N(object):
 
     @staticmethod
     def clean_posting_date(x, conf):
+        x = x['value']
         try:
             d = dateparser.parse(x).isoformat()
             o = dict()
@@ -243,6 +247,7 @@ class N(object):
         return None
 
     def clean_ethnicity(self, x, conf):
+        x = x['value']
         ethnicity = None
         if self.hj_ethnicity_obj:
             ethnicity = N.sanity_check_values(self.hj_ethnicity_obj.findBestMatchStringCached(x), conf)
@@ -254,6 +259,7 @@ class N(object):
         return None
 
     def clean_eye_color(self, x, conf):
+        x = x['value']
         eye_color = None
         if self.hj_eyes_obj:
             eye_color = N.sanity_check_values(self.hj_eyes_obj.findBestMatchStringCached(x), conf)
@@ -265,6 +271,7 @@ class N(object):
         return None
 
     def clean_hair_color(self, x, conf):
+        x = x['value']
         hair_color = None
         if self.hj_hair_obj:
             hair_color = N.sanity_check_values(self.hj_hair_obj.findBestMatchStringCached(x), conf)
@@ -276,13 +283,13 @@ class N(object):
         return None
 
     @staticmethod
-    def clean_city(x):
+    def clean_city(x, conf=None):
         o = dict()
         if isinstance(x, dict):
             if 'value' in x:
                 if 'state' in x and 'country' in x and 'longitude' in x and 'latitude' in x:
-                    o['key'] = x['value'] + ":" + x['state'] + ":" + x['country'] + ":" + x['longitude'] + ":" + \
-                           x['latitude']
+                    o['key'] = x['value'] + ":" + x['state'] + ":" + x['country'] + ":" + str(x['longitude']) + ":" + \
+                           str(x['latitude'])
                     o['name'] = x['value']
                 else:
                     o['key'] = x['value']
@@ -310,6 +317,7 @@ class N(object):
 
     @staticmethod
     def identity(x, conf=None):
+        x = x['value']
         o = dict()
         o['name'] = x
         return o

@@ -221,7 +221,7 @@ class Extractor(object):
 content_extractors = {
     'READABILITY_HIGH_RECALL': Extractor(readability_extractor_init, 'raw_content', 'extractors.content_relaxed.text'),
     'READABILITY_LOW_RECALL': Extractor(readability_extractor_rc_init, 'raw_content', 'extractors.content_strict.text'),
-    'TABLE': Extractor(table_extractor_init, 'raw_content', 'extractors.tables.text'),
+    # 'TABLE': Extractor(table_extractor_init, 'raw_content', 'extractors.tables.text'),
     'TITLE': Extractor(title_regex_extractor, 'raw_content', 'extractors.content_strict.title')
 }
 
@@ -292,243 +292,243 @@ class ProcessExtractor(Extractor):
                 res.append(extractor)
         return res
 
-def buildTreeFromHtml(self, tokenizer=False):
-    ep = []
-    for key, extractor in self.content_extractors.iteritems():
-        processor = ExtractorProcessor() \
-            .set_input_fields(extractor.input) \
-            .set_output_field(extractor.output) \
-            .set_extractor(extractor.type) \
-            .set_name(key)
-        ep.append(processor)
-    return ep
+    def buildTreeFromHtml(self, tokenizer=False):
+        ep = []
+        for key, extractor in self.content_extractors.iteritems():
+            processor = ExtractorProcessor() \
+                .set_input_fields(extractor.input) \
+                .set_output_field(extractor.output) \
+                .set_extractor(extractor.type) \
+                .set_name(key)
+            ep.append(processor)
+        return ep
 
-def buildTokens(self, doc):
-    ep = []
-    jsonpath_expr = parse('extractors.*.text')
-    values = [(str(match.full_path), match.value) for match in jsonpath_expr.find(doc)]
-    for value in values:
-        path = value[0]
-        data = value[1][0]
-        ep_type = data['type']
+    def buildTokens(self, doc):
+        ep = []
+        jsonpath_expr = parse('extractors.*.text')
+        values = [(str(match.full_path), match.value) for match in jsonpath_expr.find(doc)]
+        for value in values:
+            path = value[0]
+            data = value[1][0]
+            ep_type = data['type']
 
-        # special for table to find internal tokens
-        if ep_type == 'table':
-            table_expr = parse('result.value.tables[*].rows[*].cells[*].text')
-            table_values = [(str(match.full_path), match.value) for match in table_expr.find(data)]
-            for table_value in table_values:
-                table_path = table_value[0]
-                ep_table_path = path + '[0].' + table_path
-                op = ep_table_path[:-5]
+            # special for table to find internal tokens
+            if ep_type == 'table':
+                table_expr = parse('result.value.tables[*].rows[*].cells[*].text')
+                table_values = [(str(match.full_path), match.value) for match in table_expr.find(data)]
+                for table_value in table_values:
+                    table_path = table_value[0]
+                    ep_table_path = path + '[0].' + table_path
+                    op = ep_table_path[:-5]
+                    token_ep = ExtractorProcessor() \
+                        .set_name('tokens') \
+                        .set_input_fields(ep_table_path + '[0].result.value') \
+                        .set_output_field(op + '.crf_tokens') \
+                        .set_extractor(tokenizer_extractor)
+                    ep.append(token_ep)
+            else:
+                op = '.'.join(path.split('.')[:-1])
                 token_ep = ExtractorProcessor() \
                     .set_name('tokens') \
-                    .set_input_fields(ep_table_path + '[0].result.value') \
+                    .set_input_fields(path + '[0].result.value') \
                     .set_output_field(op + '.crf_tokens') \
                     .set_extractor(tokenizer_extractor)
                 ep.append(token_ep)
-        else:
-            op = '.'.join(path.split('.')[:-1])
-            token_ep = ExtractorProcessor() \
-                .set_name('tokens') \
-                .set_input_fields(path + '[0].result.value') \
-                .set_output_field(op + '.crf_tokens') \
-                .set_extractor(tokenizer_extractor)
-            ep.append(token_ep)
-    return ep
+        return ep
 
-@staticmethod
-def process_inferlink_fields(doc):
-    path = 'extractors.content_strict.data_extractors'
-    for key in inferlink_data_fields.keys():
-        # print key
-        inferlink_fields = inferlink_data_fields[key]
-        for field in inferlink_fields:
-            if field in doc:
-                # print "BEFORE"
-                # pp.pprint(doc['extractors']['content_strict']['data_extractors'])
-                # print field
-                #print doc[field][0]['result']['value']
-                print "Adding %s to %s" % (field, key)
-                # print path + "." + key
-                identity_extractor = LambdaExtractor(field).set_extract_function(lambda x: x) \
-                    .set_metadata({'extractor': 'inferlink', 'input_type': ['text']})
-                identity_processor = ExtractorProcessor() \
-                    .set_input_fields(field + "[*].result.value") \
-                    .set_output_fields(path + "." + key).set_extractor(identity_extractor)
-                # print identitity_processor.get_extractor().extract(doc[field][0]['result']['value'])
-                doc = identity_processor.extract(doc)
-                if identity_processor is not None:
-                    identity_processor = None
-
-                    # print "AFTER"
+    @staticmethod
+    def process_inferlink_fields(doc):
+        path = 'extractors.content_strict.data_extractors'
+        for key in inferlink_data_fields.keys():
+            # print key
+            inferlink_fields = inferlink_data_fields[key]
+            for field in inferlink_fields:
+                if field in doc:
+                    # print "BEFORE"
                     # pp.pprint(doc['extractors']['content_strict']['data_extractors'])
+                    # print field
+                    #print doc[field][0]['result']['value']
+                    print "Adding %s to %s" % (field, key)
+                    # print path + "." + key
+                    identity_extractor = LambdaExtractor(field).set_extract_function(lambda x: x) \
+                        .set_metadata({'extractor': 'inferlink', 'input_type': ['text']})
+                    identity_processor = ExtractorProcessor() \
+                        .set_input_fields(field + "[*].result.value") \
+                        .set_output_fields(path + "." + key).set_extractor(identity_extractor)
+                    # print identitity_processor.get_extractor().extract(doc[field][0]['result']['value'])
+                    doc = identity_processor.extract(doc)
+                    if identity_processor is not None:
+                        identity_processor = None
 
-                    # try:
-                    #     print doc['extractors']['content_strict']['data_extractors'][key]
-                    # except:
-                    #     pass
-    return doc
+                        # print "AFTER"
+                        # pp.pprint(doc['extractors']['content_strict']['data_extractors'])
+
+                        # try:
+                        #     print doc['extractors']['content_strict']['data_extractors'][key]
+                        # except:
+                        #     pass
+        return doc
 
 
-def buildDataExtractors(self, doc):
-    ep = []
-    if self.landmark:
-        ep.append(self.landmark)
-    for extractor in self.data_extractors:
-        metadata = extractor.get_metadata()
-        inputs = metadata['input_type']
-        output = metadata['semantic_type']
+    def buildDataExtractors(self, doc):
+        ep = []
+        if self.landmark:
+            ep.append(self.landmark)
+        for extractor in self.data_extractors:
+            metadata = extractor.get_metadata()
+            inputs = metadata['input_type']
+            output = metadata['semantic_type']
 
-        for inp in inputs:
-            print "building..", output, " extractor"
-            input_suffix, expression = '', ''
-            if inp == 'tokens':
-                input_suffix = '[0].result[0].value'
-                expression = 'extractors.*.tokens'
-            elif inp == "text":
-                input_suffix = '[0].result.value'
-                expression = 'extractors.*.text'
+            for inp in inputs:
+                print "building..", output, " extractor"
+                input_suffix, expression = '', ''
+                if inp == 'tokens':
+                    input_suffix = '[0].result[0].value'
+                    expression = 'extractors.*.tokens'
+                elif inp == "text":
+                    input_suffix = '[0].result.value'
+                    expression = 'extractors.*.text'
 
-            jsonpath_expr = parse(expression)
-            values = [str(match.full_path) for match in jsonpath_expr.find(doc)]
-            for value in values:
-                op = '.'.join(value.split('.')[:-1])
-                processor = ExtractorProcessor() \
-                    .set_input_fields(value + input_suffix) \
-                    .set_output_field(op + '.data_extractors.' + output) \
-                    .set_extractor(extractor) \
-                    .set_name(output)
-                ep.append(processor)
-    return ep
+                jsonpath_expr = parse(expression)
+                values = [str(match.full_path) for match in jsonpath_expr.find(doc)]
+                for value in values:
+                    op = '.'.join(value.split('.')[:-1])
+                    processor = ExtractorProcessor() \
+                        .set_input_fields(value + input_suffix) \
+                        .set_output_field(op + '.data_extractors.' + output) \
+                        .set_extractor(extractor) \
+                        .set_name(output)
+                    ep.append(processor)
+        return ep
 
-def buildDataExtractorsForTable(self, doc):
-    ep = []
-    for extractor in self.data_extractors:
-        metadata = extractor.get_metadata()
-        inputs = metadata['input_type']
-        output = metadata['semantic_type']
+    def buildDataExtractorsForTable(self, doc):
+        ep = []
+        for extractor in self.data_extractors:
+            metadata = extractor.get_metadata()
+            inputs = metadata['input_type']
+            output = metadata['semantic_type']
 
-        for inp in inputs:
-            print "building..", output, " extractor for tables"
-            input_suffix, expression = '', ''
-            if inp == 'tokens':
-                input_suffix = '[0].result[0].value'
-                expression = 'extractors.tables.text.[*].result.value.tables[*].rows[*].cells[*].tokens'
-            elif inp == "text":
-                input_suffix = '[0].result.value'
-                expression = 'extractors.tables.text.[*].result.value.tables[*].rows[*].cells[*].text'
+            for inp in inputs:
+                print "building..", output, " extractor for tables"
+                input_suffix, expression = '', ''
+                if inp == 'tokens':
+                    input_suffix = '[0].result[0].value'
+                    expression = 'extractors.tables.text.[*].result.value.tables[*].rows[*].cells[*].tokens'
+                elif inp == "text":
+                    input_suffix = '[0].result.value'
+                    expression = 'extractors.tables.text.[*].result.value.tables[*].rows[*].cells[*].text'
 
-            jsonpath_expr = parse(expression)
-            values = [str(match.full_path) for match in jsonpath_expr.find(doc)]
-            for value in values:
-                op = '.'.join(value.split('.')[:-1])
-                processor = ExtractorProcessor() \
-                    .set_input_fields(value + input_suffix) \
-                    .set_output_field(op + '.data_extractors.' + output) \
-                    .set_extractor(extractor) \
-                    .set_name(output)
-                ep.append(processor)
-    return ep
+                jsonpath_expr = parse(expression)
+                values = [str(match.full_path) for match in jsonpath_expr.find(doc)]
+                for value in values:
+                    op = '.'.join(value.split('.')[:-1])
+                    processor = ExtractorProcessor() \
+                        .set_input_fields(value + input_suffix) \
+                        .set_output_field(op + '.data_extractors.' + output) \
+                        .set_extractor(extractor) \
+                        .set_name(output)
+                    ep.append(processor)
+        return ep
 
-def string_to_json(self, source):
-    try:
-        load_input_json = json.loads(source)
-    except ValueError, e:
-        raise Exception("Could not parse '%s' as JSON: %s" % (source, e))
-    return load_input_json
+    def string_to_json(self, source):
+        try:
+            load_input_json = json.loads(source)
+        except ValueError, e:
+            raise Exception("Could not parse '%s' as JSON: %s" % (source, e))
+        return load_input_json
 
-def _json_path_search(self, json, expr):
-    path = parse(expr)
-    return path.find(json)
+    def _json_path_search(self, json, expr):
+        path = parse(expr)
+        return path.find(json)
 
-def update_json(self, doc, matches, name, value, index=0, parent=False):
-    load_input_json = doc
-    datum_object = matches[int(index)]
-    if not isinstance(datum_object, jsonpath.DatumInContext):
-        raise Exception("Nothing found by the given json-path")
-    path = datum_object.path
-    if isinstance(path, jsonpath.Index):
-        datum_object.context.value[datum_object.path.index][name] = value
-    elif isinstance(path, jsonpath.Fields):
-        datum_object.context.value[name] = value
-    return load_input_json
+    def update_json(self, doc, matches, name, value, index=0, parent=False):
+        load_input_json = doc
+        datum_object = matches[int(index)]
+        if not isinstance(datum_object, jsonpath.DatumInContext):
+            raise Exception("Nothing found by the given json-path")
+        path = datum_object.path
+        if isinstance(path, jsonpath.Index):
+            datum_object.context.value[datum_object.path.index][name] = value
+        elif isinstance(path, jsonpath.Fields):
+            datum_object.context.value[name] = value
+        return load_input_json
 
-def buildSimpleTokensFromStructured(self, doc):
-    expression = 'extractors.*.crf_tokens'
-    jsonpath_expr = parse(expression)
-    matches = jsonpath_expr.find(doc)
-    i = 0
-    for match in matches:
-        val = match.value
-        tokens = val[0]['result'][0]['value']
-        new_simple_tokens = [tk['value'] for tk in tokens]
-        data = [{"result": [{"value": new_simple_tokens}]}]
-        doc = self.update_json(doc, matches, 'tokens', data, i, parent=True)
-        i += 1
-    # for tables
-    table_expr = parse('extractors.tables.text.[*].result.value.tables[*].rows[*].cells[*].crf_tokens')
-    table_matches = table_expr.find(doc)
-    i = 0
-    # table_values = [(str(match.full_path), match.value) for match in table_expr.find(doc)]
-    for match in table_matches:
-        val = match.value
-        tokens = val[0]['result'][0]['value']
-        new_simple_tokens = [tk['value'] for tk in tokens]
-        data = [{"result": [{"value": new_simple_tokens}]}]
-        doc = self.update_json(doc, table_matches, 'tokens', data, i, parent=True)
-        i += 1
-    return doc
-
-def annotateTokenToExtractions(self, tokens, extractions):
-    for extractor, extraction in extractions.iteritems():
-        if extractor in ['phone']:
-            " ignoring phone annotation.."
-            continue
-        input_type = extraction[0]['input_type']
-        if 'tokens' not in input_type:
-            print "ignoring ", extractor, " as tokens not dependant.."
-            continue
-        data = extraction[0]['result']
-        for extraction in data:
-            start = extraction['context']['start']
-            end = extraction['context']['end']
-            offset = 0
-            for i in range(start, end):
-                if 'semantic_type' not in tokens[i].keys():
-                    tokens[i]['semantic_type'] = []
-                temp = {}
-                temp['type'] = extractor
-                temp['offset'] = offset
-                if offset == 0:
-                    temp['length'] = end - start
-                tokens[i]['semantic_type'].append(temp)
-                offset += 1
-    return tokens
-
-def anotateDocTokens(self, doc, type=None):
-    if type == 'Table':
-        expression = 'extractors.tables.text.[*].result.value.tables[*].rows[*].cells[*].crf_tokens'
-    else:
+    def buildSimpleTokensFromStructured(self, doc):
         expression = 'extractors.*.crf_tokens'
-    jsonpath_expr = parse(expression)
-    matches = jsonpath_expr.find(doc)
-    i = 0
-    for match in matches:
-        val, path = match.value, str(match.full_path)
-        tokens = val[0]['result'][0]['value']
-        # find data extractors
-        data_expression = '.'.join(path.split('.')[:-1]) + '.data_extractors'
-        data_jsonpath_expr = parse(data_expression)
-
-        results_expr = data_jsonpath_expr.find(doc)
-        if len(results_expr) == 0:
+        jsonpath_expr = parse(expression)
+        matches = jsonpath_expr.find(doc)
+        i = 0
+        for match in matches:
+            val = match.value
+            tokens = val[0]['result'][0]['value']
+            new_simple_tokens = [tk['value'] for tk in tokens]
+            data = [{"result": [{"value": new_simple_tokens}]}]
+            doc = self.update_json(doc, matches, 'tokens', data, i, parent=True)
             i += 1
-            continue
-        data_extractors_val = results_expr[0].value
+        # for tables
+        table_expr = parse('extractors.tables.text.[*].result.value.tables[*].rows[*].cells[*].crf_tokens')
+        table_matches = table_expr.find(doc)
+        i = 0
+        # table_values = [(str(match.full_path), match.value) for match in table_expr.find(doc)]
+        for match in table_matches:
+            val = match.value
+            tokens = val[0]['result'][0]['value']
+            new_simple_tokens = [tk['value'] for tk in tokens]
+            data = [{"result": [{"value": new_simple_tokens}]}]
+            doc = self.update_json(doc, table_matches, 'tokens', data, i, parent=True)
+            i += 1
+        return doc
 
-        annotated_tokens = self.annotateTokenToExtractions(tokens, data_extractors_val)
-        val[0]['result'][0]['value'] = annotated_tokens
+    def annotateTokenToExtractions(self, tokens, extractions):
+        for extractor, extraction in extractions.iteritems():
+            if extractor in ['phone']:
+                " ignoring phone annotation.."
+                continue
+            input_type = extraction[0]['input_type']
+            if 'tokens' not in input_type:
+                print "ignoring ", extractor, " as tokens not dependant.."
+                continue
+            data = extraction[0]['result']
+            for extraction in data:
+                start = extraction['context']['start']
+                end = extraction['context']['end']
+                offset = 0
+                for i in range(start, end):
+                    if 'semantic_type' not in tokens[i].keys():
+                        tokens[i]['semantic_type'] = []
+                    temp = {}
+                    temp['type'] = extractor
+                    temp['offset'] = offset
+                    if offset == 0:
+                        temp['length'] = end - start
+                    tokens[i]['semantic_type'].append(temp)
+                    offset += 1
+        return tokens
 
-        doc = self.update_json(doc, matches, 'crf_tokens', val, i, parent=True)
-        i += 1
-    return doc
+    def anotateDocTokens(self, doc, type=None):
+        if type == 'Table':
+            expression = 'extractors.tables.text.[*].result.value.tables[*].rows[*].cells[*].crf_tokens'
+        else:
+            expression = 'extractors.*.crf_tokens'
+        jsonpath_expr = parse(expression)
+        matches = jsonpath_expr.find(doc)
+        i = 0
+        for match in matches:
+            val, path = match.value, str(match.full_path)
+            tokens = val[0]['result'][0]['value']
+            # find data extractors
+            data_expression = '.'.join(path.split('.')[:-1]) + '.data_extractors'
+            data_jsonpath_expr = parse(data_expression)
+
+            results_expr = data_jsonpath_expr.find(doc)
+            if len(results_expr) == 0:
+                i += 1
+                continue
+            data_extractors_val = results_expr[0].value
+
+            annotated_tokens = self.annotateTokenToExtractions(tokens, data_extractors_val)
+            val[0]['result'][0]['value'] = annotated_tokens
+
+            doc = self.update_json(doc, matches, 'crf_tokens', val, i, parent=True)
+            i += 1
+        return doc
