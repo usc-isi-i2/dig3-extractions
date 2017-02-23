@@ -301,8 +301,6 @@ class N(object):
 
     @staticmethod
     def sanity_check_values(x, conf):
-        # print x
-        # print conf
         if not x:
             return x
         if 'range' in conf:

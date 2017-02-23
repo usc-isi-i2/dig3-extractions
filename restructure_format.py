@@ -43,8 +43,6 @@ def get_value_sem_type(tokens):
                         # this token is the first of 'length' values for this field
                         length = sem_t['length']
                         field = sem_t['type']
-                        # if field == 'city':
-                        #     print token
                         val = token['value']
                         length -= 1  # read the remaining length - 1 tokens to contruct the full value
                         offset = sem_t['offset']
@@ -60,11 +58,7 @@ def get_value_sem_type(tokens):
                         if field not in semantic_type_values:
                             semantic_type_values[field] = list()
                         obj = dict()
-                        # obj['probability'] = sem_t['probability']
                         obj['value'] = val.strip()
-                        # if 'selected' in sem_t:
-                        #     obj['selected'] = True
-
                         for key in sem_t.keys():
                             if key != 'value':
                                 obj[key] = sem_t[key]
@@ -72,8 +66,6 @@ def get_value_sem_type(tokens):
                     tokens[i][SEM_TYPE][j]['read'] = True
     for key in semantic_type_values.keys():
         semantic_type_values[key].sort(key=lambda x: x['probability'], reverse=True)
-        # values_only = (x['value'] for x in semantic_type_values[key])
-        # semantic_type_values[key] = list(values_only)
     return semantic_type_values
 
 
@@ -94,7 +86,6 @@ def create_field_objects(obj_dedup_semantic_types, value_type, values, field_nam
 def create_field_object(obj_dedup_semantic_types, value_type, value, field_name, normalize_conf, N):
 
     out = dict()
-    # print "INPUT:", value
     if field_name in normalize_conf:
         f_conf = normalize_conf[field_name]
         func = getattr(N, f_conf['function'])
@@ -104,24 +95,18 @@ def create_field_object(obj_dedup_semantic_types, value_type, value, field_name,
         if end_time > .05:
             print "Time taken to normalize %s : %f" % (value['value'], end_time)
         if o:
-            # print "Normalized output 1:", o
             if o['name'] not in obj_dedup_semantic_types[field_name][value_type]:
                 obj_dedup_semantic_types[field_name][value_type].append(o['name'])
-                # print "changing dedup:", json.dumps(obj_dedup_semantic_types)
                 return o, obj_dedup_semantic_types
             return None, obj_dedup_semantic_types
         else:
             out['key'] = ''
             out['name'] = value['value']
-            # print "Normalized output 2:", out
             return out, obj_dedup_semantic_types
 
     out['key'] = value['value']
     out['name'] = value['value']
 
-    # print 'Not Normalized output: ', out
-    # print "\n"
-    # print "Normalized output 3 :", out
     return out, obj_dedup_semantic_types
 
 
@@ -143,7 +128,6 @@ def add_objects_to_semantic_types_for_gui(obj_semantic_types, obj_dedup_semantic
         obj_semantic_types[semantic_type]['relaxed'] = list()
 
     if value_type == 'strict':
-        # print values
         for val in values:
             if 'selected' in val \
                     or ('probability' in val and val['probability'] >= probability_threshold) \
@@ -155,8 +139,6 @@ def add_objects_to_semantic_types_for_gui(obj_semantic_types, obj_dedup_semantic
                     print "1. Appending to %s %s %s" % (semantic_type, value_type, out)
                     obj_semantic_types[semantic_type][value_type].append(out)
             else:
-                # print obj_semantic_types[semantic_type]['relaxed']
-                # print val
                 out, obj_dedup_semantic_types = create_field_objects(obj_dedup_semantic_types, 'relaxed', val,
                                                                      semantic_type, normalize_conf, N)
                 if out:
@@ -203,9 +185,6 @@ def consolidate_semantic_types(doc, normalize_conf, N):
                 de_strict = content_strict['data_extractors']
                 for key in de_strict.keys():
                     extraction = consolidate_extractor_values(de_strict[key])
-                    # print key
-                    # print doc['doc_id']
-                    # print extraction
                     semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(
                         semantic_type_objs, obj_dedup_semantic_types,
                         key, extraction, 'strict',
@@ -217,7 +196,6 @@ def consolidate_semantic_types(doc, normalize_conf, N):
             elif 'inferlink_title' in doc:
                 title = doc['inferlink_title'][0]['result']
             if title:
-                # print title
                 title = [title]
                 semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(semantic_type_objs,
                                                                                                      obj_dedup_semantic_types,
