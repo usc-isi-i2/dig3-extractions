@@ -1,0 +1,69 @@
+name: memexeval2017
+dependencies:
+- ipython=3.1.0=py27_0
+- ipython-notebook=3.1.0=py27_1
+- jinja2=2.7.3=py27_1
+- jsonschema=2.4.0=py27_0
+- libsodium=0.4.5=0
+- libxml2=2.9.2=0
+- libxslt=1.1.28=0
+- lxml=3.6.4=py27_0
+- markupsafe=0.23=py27_0
+- mistune=0.5.1=py27_1
+- openssl=1.0.2h=1
+- pip=8.1.2=py27_0
+- ptyprocess=0.4=py27_0
+- pycosat=0.6.1=py27_0
+- pygments=2.0.2=py27_0
+- python=2.7.12=1
+- pyyaml=3.11=py27_0
+- pyzmq=14.6.0=py27_0
+- readline=6.2=2
+- requests=2.6.2=py27_0
+- setuptools=26.1.1=py27_0
+- sqlite=3.13.0=0
+- ssl_match_hostname=3.4.0.2=py27_0
+- terminado=0.5=py27_0
+- tk=8.5.18=0
+- tornado=4.1=py27_0
+- wheel=0.29.0=py27_0
+- yaml=0.1.4=0
+- zeromq=4.0.5=0
+- zlib=1.2.8=3
+- gurobi=7.0.2
+- pip:
+  - backports.ssl-match-hostname==3.4.0.2
+  - esmre==0.3.1
+  - python-dateutil==2.5.2
+  - six==1.10.0
+  - digExtractor>=0.4.0
+  - digRegexExtractor>=0.3.0
+  - digDictionaryExtractor>=0.3.0
+  - digReadabilityExtractor>=0.3.0
+  - digCrfTokenizer>=0.1.6
+  - digTokenizerExtractor>=0.3.1
+  - digRandomIndexingExtractor>=0.2.0
+  - digUrlExtractor>=0.2.0
+  - digReviewIdExtractor>=0.2.0
+  - digPhoneExtractor>=0.3.7
+  - digPriceExtractor>=0.3.2
+  - digGenderExtractor>=0.2.0
+  - digEmailExtractor>=0.3.0
+  - digAddressExtractor>=0.3.0
+  - digNationalityExtractor>=0.3.0
+  - digServiceExtractor>=0.3.0
+  - digLandmarkExtractor>=0.3.4
+  - digAgeRegexExtractor>=0.3.0
+  - digAddressExtractor>=0.3.0
+  - digPostingDateExtractor>=0.3.0
+  - digSocialMediaIdExtractor>=0.3.3
+  - digHeightWeightExtractor>=0.3.0
+  - digCollaborativeExtractor>=0.1.6
+  - digCityExtractor>=0.3.0
+  - digUrlLocalityExtractor>=0.3.0
+  - tldextract>=2.0.2
+  - digExtractionClassifier>=0.3.0
+  - digILPRankings>=0.3.7
+  - digTableExtractor>=0.2.0
+  - dateparser>=0.5.1
+
