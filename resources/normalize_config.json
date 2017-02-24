@@ -8,7 +8,7 @@
     "function": "clean_age"
   },
   "height": {
-    "data_type": "basestring",
+    "data_type": "numbers.Number",
     "range": {
       "lower_bound": 121,
       "upper_bound": 214
@@ -16,7 +16,7 @@
     "function": "clean_height"
   },
   "weight": {
-    "data_type": "basestring",
+    "data_type": "numbers.Number",
     "range": {
       "lower_bound": 40,
       "upper_bound": 150

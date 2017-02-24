@@ -3,6 +3,7 @@ import dateparser
 import sys
 sys.path.append('/Users/amandeep/Github/dig-crf/src/applyCrf')
 from hybridJaccard import hybridJaccard as hj
+import numbers
 
 
 class N(object):
@@ -153,7 +154,8 @@ class N(object):
                         if len(o_list) > 0:
                             return o_list
             else:
-                print 'YOU DONE MESSED UP'
+
+                print 'YOU DONE MESSED UP:', x
         return None
 
     @staticmethod
@@ -163,6 +165,7 @@ class N(object):
         except:
             return None
 
+    @staticmethod
     def convert_weight_all_units(x):
         try:
             return str(x) + " " + str(N.unit_conversion(x, 'kg', 'lb'))
