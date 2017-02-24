@@ -4,7 +4,6 @@ from tldextract import tldextract
 import codecs
 import pprint
 import re
-import sys, os
 from digReadabilityExtractor.readability_extractor import ReadabilityExtractor
 from jsonpath_rw import parse, jsonpath
 from digRegexExtractor.regex_extractor import RegexExtractor
@@ -18,15 +17,6 @@ from digExtractor.extractor_processor import ExtractorProcessor
 from digTokenizerExtractor.tokenizer_extractor import TokenizerExtractor
 from digLandmarkExtractor.get_landmark_extractor_processors import get_multiplexing_landmark_extractor_processor
 from landmark_extractor.extraction.Landmark import RuleSet
-
-
-# sys.path.insert(0, os.getcwd() + '/dig-table-extractor')
-# sys.path.insert(0, os.getcwd() + '/dig-extractor1')
-# sys.path.insert(0, os.getcwd() + '/dig-tokenizer-extractor1')
-
-# from digTableExtractor.table_extractor import TableExtractor
-# from digExtractor1.extractor_processor import ExtractorProcessor
-# from digTokenizerExtractor1.tokenizer_extractor import TokenizerExtractor
 
 """This is just for reference
 inferlink_field_names = [
