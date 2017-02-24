@@ -319,14 +319,14 @@ class ProcessExtractor(Extractor):
         crf_tokens = []
         if data['result']['value']:
             temp = {'text': data['result']['value']}
-            crf_tokens = Extractor.execute_extractor(tokenizer_extractor, temp)
-            print crf_tokens
-            result = [{'result': {'value': crf_tokens}}]
+            tokens = Extractor.execute_extractor(tokenizer_extractor, temp)
+            crf_tokens = tokens[0]
+            result = [{'result': {'value': crf_tokens[0]}}]
             doc = self.update_json(doc, matches, 'crf_tokens', result, index, parent=True)
         return doc, crf_tokens
 
     def addSimpleTokenizedData(self, doc, matches, index, crf_tokens):
-        new_simple_tokens = [tk['value'] for tk in crf_tokens[0]]
+        new_simple_tokens = [tk['value'] for tk in crf_tokens]
         result = [{'result': {'value': new_simple_tokens}}]
         doc = self.update_json(doc, matches, 'tokens', result, index, parent=True)
         return doc, new_simple_tokens
@@ -357,38 +357,36 @@ class ProcessExtractor(Extractor):
             doc = self.update_json(doc, matches, 'data_extractors', extractions, index, parent=True)
         return doc, extractions
 
-    def annotateTokenToExtractions(self, crf_tokens, extractions):
-        tokens = crf_tokens[0]
-        for extractor, extraction in extractions.iteritems():
+    def annotateTokenToExtractions(self, tokens, extractions):
+        for extractor, extractions in extractions.iteritems():
             if extractor in ['phone']:
                 " ignoring phone annotation.."
                 continue
+            for extraction in extractions:
+                input_type = extraction['input_type']
+                if 'text' in input_type:
+                    # build text tokens
+                    pass
 
-            input_type = extraction[0]['input_type']
-            if 'text' in input_type:
-                # build text tokens
-                pass
-
-            if 'tokens' not in input_type:
-                print "ignoring ", extractor, " as tokens not dependant.."
-                continue
-            data = extraction[0]['result']['value']
-            for extraction in data:
-                start = extraction['context']['start']
-                end = extraction['context']['end']
-                offset = 0
-                for i in range(start, end):
-                    if 'semantic_type' not in tokens[i].keys():
-                        tokens[i]['semantic_type'] = []
-                    temp = {}
-                    temp['type'] = extractor
-                    temp['offset'] = offset
-                    if offset == 0:
-                        temp['length'] = end - start
-                    tokens[i]['semantic_type'].append(temp)
-                    offset += 1
-        crf_tokens[0] = tokens
-        return crf_tokens
+                if 'tokens' not in input_type:
+                    print "ignoring ", extractor, " as tokens not dependant.."
+                    continue
+                data = extraction['result']['value']
+                for values in data:
+                    start = values['context']['start']
+                    end = values['context']['end']
+                    offset = 0
+                    for i in range(start, end):
+                        if 'semantic_type' not in tokens[i].keys():
+                            tokens[i]['semantic_type'] = []
+                        temp = {}
+                        temp['type'] = extractor
+                        temp['offset'] = offset
+                        if offset == 0:
+                            temp['length'] = end - start
+                        tokens[i]['semantic_type'].append(temp)
+                        offset += 1
+        return tokens
 
     def addTokensWithAnnotation(self, doc, matches, index, crf_tokens, content):
         crf_tokens = self.annotateTokenToExtractions(crf_tokens, content)
