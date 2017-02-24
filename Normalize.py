@@ -129,16 +129,31 @@ class N(object):
                     centimeters = N.unit_conversion(feet, 'ft', 'cm') + N.unit_conversion(inches, 'in', 'cm')
                 else:
                     centimeters = N.numeric_only(x)
+                if N.sanity_check_values(centimeters, conf) is not None:
+                    o = dict()
+                    o['name'] = centimeters
+                    o['key'] = centimeters
+                    o['search'] = N.convert_height_all_units(centimeters)
+                    return o
             except:
                 return None
         if isinstance(x, dict):
-            centimeters = N.unit_conversion(x['foot'], 'ft', 'cm') + N.unit_conversion(x['inch'], 'in', 'cm')
-        if N.sanity_check_values(centimeters, conf) is not None:
-            o = dict()
-            o['name'] = centimeters
-            o['key'] = centimeters
-            o['search'] = N.convert_height_all_units(centimeters)
-            return o
+            print x
+            # centimeters = N.unit_conversion(x['foot'], 'ft', 'cm') + N.unit_conversion(x['inch'], 'in', 'cm')
+            if 'centimeter' in x:
+                centimeters_list = x['centimeter']
+                o_list = list()
+                for centimeters in centimeters_list:
+                    if N.sanity_check_values(centimeters, conf) is not None:
+                        o = dict()
+                        o['name'] = centimeters
+                        o['key'] = centimeters
+                        o['search'] = N.convert_height_all_units(centimeters)
+                        o_list.append(o)
+                        if len(o_list) > 0:
+                            return o_list
+            else:
+                print 'YOU DONE MESSED UP'
         return None
 
     @staticmethod
@@ -219,17 +234,28 @@ class N(object):
                         # assume lb
                         # no binning
                         clean_weight_value = float(lb_to_kg(num))
+                if N.sanity_check_values(clean_weight_value, conf) is not None:
+                    o = dict()
+                    o['name'] = clean_weight_value
+                    o['key'] = clean_weight_value
+                    o['search'] = N.convert_weight_all_units(clean_weight_value)
+                    return o
             except Exception, e:
                 return None
-        if isinstance(x, dict):
-            clean_weight_value = float(x['kilogram'])
 
-        if N.sanity_check_values(clean_weight_value, conf) is not None:
-            o = dict()
-            o['name'] = clean_weight_value
-            o['key'] = clean_weight_value
-            o['search'] = N.convert_weight_all_units(clean_weight_value)
-            return o
+        if isinstance(x, dict):
+            o_list = list()
+            weight_list = x['kilogram']
+            for clean_weight_value in weight_list:
+                clean_weight_value = float(clean_weight_value)
+                if N.sanity_check_values(clean_weight_value, conf) is not None:
+                    o = dict()
+                    o['name'] = clean_weight_value
+                    o['key'] = clean_weight_value
+                    o['search'] = N.convert_weight_all_units(clean_weight_value)
+                    o_list.append(o)
+                    if len(o_list) > 0:
+                        return o_list
         return None
 
     @staticmethod

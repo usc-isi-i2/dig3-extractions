@@ -75,7 +75,10 @@ def create_field_objects(obj_dedup_semantic_types, value_type, values, field_nam
         for val in values:
             o = create_field_object(obj_dedup_semantic_types, value_type, val, field_name, normalize_conf, N)
             if o[0]:
-                out.append(o[0])
+                if isinstance(o[0], list):
+                    out.extend(o[0])
+                else:
+                    out.append(o[0])
         if len(out) > 0:
             return out, obj_dedup_semantic_types
         return None, obj_dedup_semantic_types
@@ -137,13 +140,19 @@ def add_objects_to_semantic_types_for_gui(obj_semantic_types, obj_dedup_semantic
 
                 if out:
                     print "1. Appending to %s %s %s" % (semantic_type, value_type, out)
-                    obj_semantic_types[semantic_type][value_type].append(out)
+                    if isinstance(out,list):
+                        obj_semantic_types[semantic_type][value_type].extend(out)
+                    else:
+                        obj_semantic_types[semantic_type][value_type].append(out)
             else:
                 out, obj_dedup_semantic_types = create_field_objects(obj_dedup_semantic_types, 'relaxed', val,
                                                                      semantic_type, normalize_conf, N)
                 if out:
                     print "2. Appending to %s %s %s" % (semantic_type, 'relaxed', out)
-                    obj_semantic_types[semantic_type]['relaxed'].append(out)
+                    if isinstance(out, list):
+                        obj_semantic_types[semantic_type]['relaxed'].extend(out)
+                    else:
+                        obj_semantic_types[semantic_type]['relaxed'].append(out)
     elif value_type == 'relaxed':
         out, obj_dedup_semantic_types = create_field_objects(obj_dedup_semantic_types, value_type, values,
                                                              semantic_type, normalize_conf, N)

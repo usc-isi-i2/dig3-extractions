@@ -2,12 +2,9 @@ import json
 import time
 from tldextract import tldextract
 import codecs
-import os
-import sys
 import pprint
 import re
 from digReadabilityExtractor.readability_extractor import ReadabilityExtractor
-# from digExtractor.extractor_processor import ExtractorProcessor
 from jsonpath_rw import parse, jsonpath
 from digPhoneExtractor.phone_extractor import PhoneExtractor
 from digAgeRegexExtractor.age_regex_helper import get_age_regex_extractor
@@ -20,6 +17,7 @@ from digLandmarkExtractor.get_landmark_extractor_processors import get_multiplex
 from landmark_extractor.extraction.Landmark import RuleSet
 from digRegexExtractor.regex_extractor import RegexExtractor
 from digExtractor.extractor import Extractor as SuperExtractor
+from digHeightWeightExtractor.height_weight_extractor import HeightWeightExtractor
 
 
 """This is just for reference
@@ -131,6 +129,13 @@ hair_color_dictionary_extractor_init = DictionaryExtractor() \
     'properties_key': 'haircolor',  # !Important
 }) \
     .set_include_context(True)
+
+height_weight_extractor_init = HeightWeightExtractor()\
+            .set_metadata({'extractor': 'height_weight',
+                           'semantic_type': 'height_weight',
+                           'input_type': ['text'],
+                           'type': 'height_weight'})
+
 
 class LambdaExtractor(SuperExtractor):
 
@@ -273,7 +278,8 @@ class ProcessExtractor(Extractor):
             city_dictionary_extractor_init,
             hair_color_dictionary_extractor_init,
             name_dictionary_extractor_init,
-            ethnicities_dictionary_extractor_init
+            ethnicities_dictionary_extractor_init,
+            height_weight_extractor_init
         ]
 
         res = []
@@ -340,35 +346,99 @@ class ProcessExtractor(Extractor):
     def process_inferlink_fields(doc):
         path = 'extractors.content_strict.data_extractors'
         for key in inferlink_data_fields.keys():
-            # print key
             inferlink_fields = inferlink_data_fields[key]
+            metadata = {'extractor': 'inferlink', 'input_type': ['text']}
             for field in inferlink_fields:
                 if field in doc:
-                    # print "BEFORE"
-                    # pp.pprint(doc['extractors']['content_strict']['data_extractors'])
-                    # print field
-                    #print doc[field][0]['result']['value']
                     print "Adding %s to %s" % (field, key)
-                    # print path + "." + key
-                    identity_extractor = LambdaExtractor(field).set_extract_function(lambda x: x) \
-                        .set_metadata({'extractor': 'inferlink', 'input_type': ['text']})
-                    identity_processor = ExtractorProcessor() \
-                        .set_input_fields(field + "[*].result.value") \
-                        .set_output_fields(path + "." + key).set_extractor(identity_extractor)
-                    # print identitity_processor.get_extractor().extract(doc[field][0]['result']['value'])
-                    doc = identity_processor.extract(doc)
-                    if identity_processor is not None:
-                        identity_processor = None
-
-                        # print "AFTER"
-                        # pp.pprint(doc['extractors']['content_strict']['data_extractors'])
-
-                        # try:
-                        #     print doc['extractors']['content_strict']['data_extractors'][key]
-                        # except:
-                        #     pass
+                    doc = ProcessExtractor.run_identity_extractor(doc, field + "[*].result.value", path + "." + key, metadata, field )
+                    # identity_extractor = LambdaExtractor(field).set_extract_function(lambda x: x) \
+                    #     .set_metadata()
+                    # identity_processor = ExtractorProcessor() \
+                    #     .set_input_fields(field + "[*].result.value") \
+                    #     .set_output_fields(path + "." + key).set_extractor(identity_extractor)
+                    # doc = identity_processor.extract(doc)
         return doc
 
+    @staticmethod
+    def process_height_weight(doc):
+        """
+        Need to process height weight separately as there is one extractor to return both
+        :param doc: with height_weight present in the path extractors.*.data_extractors.height_weight
+        :return doc: with height_weight present in the path
+                     extractors.*.data_extractors.height and extractors.*.data_extractors.height
+        """
+        """
+        [
+  {
+    "extractor": "height_weight",
+    "name": "height_weight",
+    "input_type": [
+      "text"
+    ],
+    "source": "extractors.content_strict.text[0].result.value",
+    "result": {
+      "value": {
+        "height": {
+          "foot": [
+            "5'9\""
+          ],
+          "raw": [
+            {
+              "foot": 5,
+              "inch": 9
+            }
+          ],
+          "centimeter": [
+            175
+          ]
+        }
+      }
+    },
+    "type": "height_weight",
+    "semantic_type": "height_weight"
+  }
+]
+        """
+        path = 'extractors.*.data_extractors.height_weight'
+        jp_expr = parse(path)
+        for match in jp_expr.find(doc):
+            values = match.value
+            source_path = str(match.full_path)
+            op = '.'.join(source_path.split('.')[:-1])
+            for value in values:
+                val = value['result']['value']
+                metadata = {'extractor': 'height_weight', 'input_type': ['text']}
+                if 'height' not in val and 'weight' not in val:
+                    print 'GO BACKKKKK'
+                    return doc
+                if 'height' in val:
+                    field = 'height'
+                    print "Adding %s to %s" % ('hw_height', field)
+                    doc['t_height'] = val[field]
+                    input_path = 't_height'
+                    output_path = op + "." + field
+                    doc = ProcessExtractor.run_identity_extractor(doc, input_path, output_path, metadata, 't_height')
+
+                if 'weight' in val:
+                    field = 'weight'
+                    print "Adding %s to %s" % ('hw_weight', field)
+                    doc['t_weight'] = val[field]
+                    input_path = 't_weight'
+                    output_path = op + "." + field
+                    doc = ProcessExtractor.run_identity_extractor(doc, input_path, output_path, metadata, 't_weight')
+        doc.pop('t_height', None)
+        doc.pop('t_weight', None)
+        return doc
+
+    @staticmethod
+    def run_identity_extractor(doc, input_field, output_field, metadata, semantic_type):
+        identity_extractor = LambdaExtractor(semantic_type).set_extract_function(lambda x: x) \
+            .set_metadata(metadata)
+        identity_processor = ExtractorProcessor() \
+            .set_input_fields(input_field) \
+            .set_output_fields(output_field).set_extractor(identity_extractor)
+        return identity_processor.extract(doc)
 
     def buildDataExtractors(self, doc):
         ep = []

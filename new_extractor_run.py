@@ -57,7 +57,7 @@ if __name__ == "__main__":
     # Init the extractors
     # content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL', 'TABLE', 'TITLE']
     content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL', 'TITLE']
-    data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color', 'landmark', 'name']
+    data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color', 'landmark', 'name', 'height_weight']
     extraction_classifiers = ['city', 'ethnicity', 'hair_color', 'name', 'eye_color']
     properties = load_json_file(properties_file)
 
@@ -65,10 +65,10 @@ if __name__ == "__main__":
     pe = ProcessExtractor(content_extractors, data_extractors, properties, landmark_rules=landmark_rules)
 
     # Initialize the classifiers
-    classifier_processor = ProcessClassifier(extraction_classifiers)
-
-    # Initialize the ILP engine
-    ilp_processor = ProcessILP(properties)
+    # classifier_processor = ProcessClassifier(extraction_classifiers)
+    #
+    # # Initialize the ILP engine
+    # ilp_processor = ProcessILP(properties)
 
     # Build tree from raw content
     # get all processors for root extractors
@@ -103,22 +103,22 @@ if __name__ == "__main__":
         # print "Done"
 
         result_doc = pe.process_inferlink_fields(result_doc)
-
+        result_doc = pe.process_height_weight(result_doc)
         # annotate
-        print "Annotating tokens and data extractors..."
-        result_doc = pe.anotateDocTokens(result_doc)
-
-        print "Annotating tokens and data extractors for table..."
-        result_doc = pe.anotateDocTokens(result_doc, type='Table')
-
-        # Classifying the extractions using their context and appending the probabilities
-        print "Classifying the extractions..."
-
-        result_doc = classifier_processor.classify_extractions(result_doc)
-
-        # Formulating and Solving the ILP for the extractions
-        print "Formulating and Solving the ILP"
-        result_doc = ilp_processor.run_ilp(result_doc)
+        # print "Annotating tokens and data extractors..."
+        # result_doc = pe.anotateDocTokens(result_doc)
+        #
+        # print "Annotating tokens and data extractors for table..."
+        # result_doc = pe.anotateDocTokens(result_doc, type='Table')
+        #
+        # # Classifying the extractions using their context and appending the probabilities
+        # print "Classifying the extractions..."
+        #
+        # result_doc = classifier_processor.classify_extractions(result_doc)
+        #
+        # # Formulating and Solving the ILP for the extractions
+        # print "Formulating and Solving the ILP"
+        # result_doc = ilp_processor.run_ilp(result_doc)
 
         print "Done.."
         print '*' * 20, " End ", '*' * 20
