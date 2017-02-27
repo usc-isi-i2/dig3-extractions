@@ -226,7 +226,7 @@ content_extractors = {
     'READABILITY_HIGH_RECALL': Extractor(readability_extractor_init, 'raw_content', 'content_relaxed'),
     'READABILITY_LOW_RECALL': Extractor(readability_extractor_rc_init, 'raw_content', 'content_strict'),
     'TABLE': Extractor(table_extractor_init, 'raw_content', 'tables'),
-    'TITLE': Extractor(title_regex_extractor, 'raw_content', 'extractors.content_strict.title')
+    'TITLE': Extractor(title_regex_extractor, 'raw_content', 'title')
 }
 
 """ ************** END INTIALIZATION ******************  """
@@ -244,7 +244,7 @@ class ProcessExtractor(Extractor):
             landmark_extractor_init = get_multiplexing_landmark_extractor_processor(rule_sets,
                                                                                     ['raw_content', 'tld'],
                                                                                     lambda tld: tld,
-                                                                                    None,
+                                                                                    "extractors.landmark",
                                                                                     True,
                                                                                     metadata={
                                                                                         'extractor': 'landmark',
@@ -298,6 +298,11 @@ class ProcessExtractor(Extractor):
         # Initialize levelkey if doesn't exist!
         if levelKey:
             doc[levelKey] = {}
+        if self.landmark:
+          doc = self.landmark.extract(doc)
+          # val = Extractor.execute_extractor(self.landmark, doc['raw_content'])
+          # print val
+
         for input_key in inputs:
             extract_key = input_key
             for key, extractor in self.content_extractors.iteritems():
@@ -305,6 +310,8 @@ class ProcessExtractor(Extractor):
                 if levelKey:
                     doc['html'] = doc[extract_key]
                     output = Extractor.execute_extractor(extractor.type, doc)
+                    if not output:
+                      continue
 
                     result = {'value': output}
                     metadata = extractor.type.get_metadata()
