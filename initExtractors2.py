@@ -77,7 +77,7 @@ age_extracor_init = get_age_regex_extractor().set_metadata({'semantic_type': 'ag
 html_title_regex = re.compile(r'<title>(.*?)</title>', flags=re.IGNORECASE)
 title_regex_extractor = RegexExtractor() \
     .set_regex(html_title_regex) \
-    .set_metadata({'extractor': 'title_regex', 'type': 'title'}) \
+    .set_metadata({'extractor': 'title_regex', 'type': 'title', 'input_type': ['text'], 'name': 'title'}) \
     .set_include_context(True)
 
 city_dictionary_extractor_init = DictionaryExtractor() \
@@ -206,11 +206,24 @@ class Extractor(object):
         return trie
 
     @staticmethod
+    def extract_title(doc, title_extractor):
+        title_regex_processor = ExtractorProcessor() \
+            .set_input_fields('raw_content') \
+            .set_output_field('extractors.title.text') \
+            .set_extractor(title_extractor)
+        return title_regex_processor.extract(doc)
+
+    @staticmethod
     def execute_extractor(extractor, doc):
+
         output = ""
         try:
             start_time = time.time()
             output = extractor.extract(doc)
+            metadata = extractor.get_metadata()
+            if 'name' in metadata and metadata['name'] == 'title':
+                print doc['text']
+                print output
             time_taken = time.time() - start_time
             if time_taken > 5.0:
                 print "Extractor %s took %s seconds for %s" % (extractor.get_name(), str(time_taken), doc['url'])
@@ -312,7 +325,6 @@ class ProcessExtractor(Extractor):
                     output = Extractor.execute_extractor(extractor.type, doc)
                     if not output:
                       continue
-
                     result = {'value': output}
                     metadata = extractor.type.get_metadata()
                     metadata['result'] = result
@@ -320,12 +332,21 @@ class ProcessExtractor(Extractor):
                     doc[levelKey][extractor.output] = {'text': [metadata]}
                 time_taken = time.time() - start_time
                 print "Time for " + key + " : ", time_taken
+
+        if title_regex_extractor:
+            doc = Extractor.extract_title(doc, title_regex_extractor)
+            print pprint.pprint(doc['extractors']['title'], indent=4)
         return doc
 
     def addTokenizedData(self, doc, matches, index, data):
         crf_tokens = []
-        if data['result']['value']:
-            temp = {'text': data['result']['value']}
+        r = data['result']
+        if isinstance(r, list):
+            # Currently for title, as it uses extractor processor
+            # TODO fix this, should be generic
+            r = r[0]
+        if r['value']:
+            temp = {'text': r['value']}
             tokens = Extractor.execute_extractor(tokenizer_extractor, temp)
             crf_tokens = tokens[0]
             result = [{'result': {'value': crf_tokens[0]}}]
@@ -349,7 +370,12 @@ class ProcessExtractor(Extractor):
                 temp = {'tokens': simple_tokens}
                 extraction = Extractor.execute_extractor(extractor, temp)
             elif 'text' in inputs:
-                temp = {'text': text['result']['value']}
+                r = text['result']
+                if isinstance(r, list):
+                    # TODO fix this, should be generic
+                    r = r[0]
+
+                temp = {'text': r['value']}
                 extraction = Extractor.execute_extractor(extractor, temp)
             else:
                 continue

@@ -89,6 +89,11 @@ def create_field_objects(obj_dedup_semantic_types, value_type, values, field_nam
 def create_field_object(obj_dedup_semantic_types, value_type, value, field_name, normalize_conf, N):
 
     out = dict()
+    debug = False
+    if field_name == 'height' or field_name == 'weight':
+        debug = True
+    if debug:
+        print "Input value %s" % (value)
     if field_name in normalize_conf:
         f_conf = normalize_conf[field_name]
         func = getattr(N, f_conf['function'])
@@ -100,16 +105,21 @@ def create_field_object(obj_dedup_semantic_types, value_type, value, field_name,
         if o:
             if o['name'] not in obj_dedup_semantic_types[field_name][value_type]:
                 obj_dedup_semantic_types[field_name][value_type].append(o['name'])
+                if debug:
+                    print "Output 1 %s" % (o)
                 return o, obj_dedup_semantic_types
             return None, obj_dedup_semantic_types
         else:
             out['key'] = ''
             out['name'] = value['value']
+            if debug:
+                print "Output 2 %s" % (out)
             return out, obj_dedup_semantic_types
 
     out['key'] = value['value']
     out['name'] = value['value']
-
+    if debug:
+        print "Output 3 %s" % (out)
     return out, obj_dedup_semantic_types
 
 
@@ -139,7 +149,7 @@ def add_objects_to_semantic_types_for_gui(obj_semantic_types, obj_dedup_semantic
                                                                      semantic_type, normalize_conf, N)
 
                 if out:
-                    print "1. Appending to %s %s %s" % (semantic_type, value_type, out)
+                    # print "1. Appending to %s %s %s" % (semantic_type, value_type, out)
                     if isinstance(out,list):
                         obj_semantic_types[semantic_type][value_type].extend(out)
                     else:
@@ -148,7 +158,7 @@ def add_objects_to_semantic_types_for_gui(obj_semantic_types, obj_dedup_semantic
                 out, obj_dedup_semantic_types = create_field_objects(obj_dedup_semantic_types, 'relaxed', val,
                                                                      semantic_type, normalize_conf, N)
                 if out:
-                    print "2. Appending to %s %s %s" % (semantic_type, 'relaxed', out)
+                    # print "2. Appending to %s %s %s" % (semantic_type, 'relaxed', out)
                     if isinstance(out, list):
                         obj_semantic_types[semantic_type]['relaxed'].extend(out)
                     else:
@@ -158,7 +168,7 @@ def add_objects_to_semantic_types_for_gui(obj_semantic_types, obj_dedup_semantic
                                                              semantic_type, normalize_conf, N)
 
         if out:
-            print "3. Appending to %s %s %s" % (semantic_type, value_type, out)
+            # print "3. Appending to %s %s %s" % (semantic_type, value_type, out)
             obj_semantic_types[semantic_type][value_type].extend(out)
     return obj_semantic_types, obj_dedup_semantic_types
 
