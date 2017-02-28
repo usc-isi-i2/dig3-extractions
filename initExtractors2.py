@@ -57,6 +57,19 @@ inferlink_data_fields = {
     'gender': ['inferlink_gender']
 }
 
+inverse_inferlink_data_fields = {'inferlink_price': 'price', 'inferlink_posting-date': 'posting-date',
+                                 'inferlink_posting-date-2': 'posting-date', 'inferlink_location': 'location',
+                                 'inferlink_age-2': 'age', 'inferlink_height': 'height', 'inferlink_country': 'country',
+                                 'inferlink_name': 'name', 'inferlink_city': 'city', 'inferlink_gender': 'gender',
+                                 'inferlink_age': 'age', 'inferlink_ethnicity': 'ethnicity', 'inferlink_phone': 'phone',
+                                 'inferlink_state': 'state', 'inferlink_location-1': 'location',
+                                 'inferlink_hair-color': 'hair_color', 'inferlink_location-3': 'location',
+                                 'inferlink_location-2': 'location', 'inferlink_age-1': 'age',
+                                 'inferlink_posting-date-1': 'posting-date', 'inferlink_weight': 'weight',
+                                 'inferlink_price-1': 'price', 'inferlink_price-2': 'price',
+                                 'inferlink_price-3': 'price', 'inferlink_eye-color': 'eye_color'
+                                 }
+
 
 fields_to_remove = ["crawl_data", "extracted_metadata"]
 my_name_is_name_regex = re.compile('(?:my[\s]+name[\s]+is[\s]+([-a-z0-9@$!]+))', re.IGNORECASE)
@@ -251,7 +264,7 @@ class ProcessExtractor(Extractor):
                                                                                     ['raw_content', 'tld'],
                                                                                     lambda tld: tld,
                                                                                     None,
-                                                                                    False,
+                                                                                    True,
                                                                                     metadata={
                                                                                         'extractor': 'landmark',
                                                                                         'semantic_type': 'landmark'
@@ -422,11 +435,12 @@ class ProcessExtractor(Extractor):
         return doc, crf_tokens
 
     def buildTokensAndDataExtractors(self, doc):
-        jsonpath_expr = parse('extractors.*.text')
+        jsonpath_expr = parse('*.*.text')
         matches = jsonpath_expr.find(doc)
         index = 0
         for index in range(len(matches)):
             values = matches[index].value
+            print values
             data, e_type = values[0], values[0]['type']
             if e_type == 'table':
                 # search internal text values
@@ -471,10 +485,19 @@ class ProcessExtractor(Extractor):
                     doc['landmark'] = dict()
                 landmark_extractions = doc['landmarks']
                 for le in landmark_extractions:
-                    val = le['result']['value']
-                    for key in val.keys():
+                    l_result = le['result']
+                    for key in l_result.keys():
+                        if key in inverse_inferlink_data_fields:
+                            semantic_type = inverse_inferlink_data_fields[key]
+                        else:
+                            semantic_type = ''
                         doc['landmark'][key] = dict()
-                        doc['landmark'][key]['text'] = val[key]
+                        doc['landmark'][key]['text'] = list()
+                        r_obj = dict()
+                        r_obj['result'] = dict()
+                        r_obj['result']['value'] = l_result[key]['value']
+                        r_obj['type'] = semantic_type
+                        doc['landmark'][key]['text'].append(r_obj)
         doc.pop('landmarks', None)
         return doc
 

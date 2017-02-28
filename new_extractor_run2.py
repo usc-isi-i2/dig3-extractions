@@ -88,12 +88,12 @@ if __name__ == "__main__":
         time_taken = time.time() - start_time
         print "Total time for content(Readability + table): ", time_taken
 
+        result_doc = pe.process_inferlink_fields(result_doc)
+
         start_time_mid = time.time()
         result_doc = pe.buildTokensAndDataExtractors(result_doc)
         time_taken = time.time() - start_time_mid
         print "Total time for tokenizing, data extractors and annotation: ", time_taken
-
-        result_doc = pe.process_inferlink_fields(result_doc)
 
         # Classifying the extractions using their context and appending the probabilities
         # print "Classifying the extractions..."
