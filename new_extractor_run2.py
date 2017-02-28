@@ -57,6 +57,7 @@ if __name__ == "__main__":
     landmark_rules = None
     if landmark_rules_file:
         landmark_rules = json.load(codecs.open(landmark_rules_file, 'r', 'utf-8'))
+        # print landmark_rules['eroticmugshots.com']
 
     # Init the extractors
     content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL', 'TABLE', 'TITLE']

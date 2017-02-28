@@ -12,7 +12,6 @@ from digAgeRegexExtractor.age_regex_helper import get_age_regex_extractor
 from digDictionaryExtractor.populate_trie import populate_trie
 from digDictionaryExtractor.dictionary_extractor import DictionaryExtractor
 from digExtractor.extractor import Extractor as SuperExtractor
-from digTableExtractor.table_extractor import TableExtractor
 from digExtractor.extractor_processor import ExtractorProcessor
 from digTokenizerExtractor.tokenizer_extractor import TokenizerExtractor
 from digLandmarkExtractor.get_landmark_extractor_processors import get_multiplexing_landmark_extractor_processor
@@ -65,7 +64,6 @@ name_filter_regex = re.compile('[a-z].*[a-z]')
 # Initialize root extractors
 readability_extractor_init = ReadabilityExtractor().set_metadata({'type': 'readability_high_recall'})
 readability_extractor_rc_init = ReadabilityExtractor().set_recall_priority(False).set_metadata({'type': 'readability_low_recall'})
-table_extractor_init = TableExtractor().set_metadata({'type': 'table'})
 
 
 tokenizer_extractor = TokenizerExtractor(recognize_linebreaks=True, create_structured_tokens=True).set_metadata({'extractor': 'crf_tokenizer'})
@@ -220,10 +218,6 @@ class Extractor(object):
         try:
             start_time = time.time()
             output = extractor.extract(doc)
-            metadata = extractor.get_metadata()
-            if 'name' in metadata and metadata['name'] == 'title':
-                print doc['text']
-                print output
             time_taken = time.time() - start_time
             if time_taken > 5.0:
                 print "Extractor %s took %s seconds for %s" % (extractor.get_name(), str(time_taken), doc['url'])
@@ -238,7 +232,6 @@ class Extractor(object):
 content_extractors = {
     'READABILITY_HIGH_RECALL': Extractor(readability_extractor_init, 'raw_content', 'content_relaxed'),
     'READABILITY_LOW_RECALL': Extractor(readability_extractor_rc_init, 'raw_content', 'content_strict'),
-    'TABLE': Extractor(table_extractor_init, 'raw_content', 'tables'),
     'TITLE': Extractor(title_regex_extractor, 'raw_content', 'title')
 }
 
@@ -257,13 +250,14 @@ class ProcessExtractor(Extractor):
             landmark_extractor_init = get_multiplexing_landmark_extractor_processor(rule_sets,
                                                                                     ['raw_content', 'tld'],
                                                                                     lambda tld: tld,
-                                                                                    "extractors.landmark",
-                                                                                    True,
+                                                                                    None,
+                                                                                    False,
                                                                                     metadata={
                                                                                         'extractor': 'landmark',
                                                                                         'semantic_type': 'landmark'
                                                                                     })
             if landmark_extractor_init:
+                # print "i L:", landmark_extractor_init
                 self.landmark = landmark_extractor_init
         self.content_extractors = self.__initialize(content_extractors)
         self.data_extractors = self.__get_data_extractor(data_extractors, properties)
@@ -311,10 +305,8 @@ class ProcessExtractor(Extractor):
         # Initialize levelkey if doesn't exist!
         if levelKey:
             doc[levelKey] = {}
-        if self.landmark:
-          doc = self.landmark.extract(doc)
-          # val = Extractor.execute_extractor(self.landmark, doc['raw_content'])
-          # print val
+        # if self.landmark:
+        #   doc = self.landmark.extract(doc)
 
         for input_key in inputs:
             extract_key = input_key
@@ -334,8 +326,11 @@ class ProcessExtractor(Extractor):
                 print "Time for " + key + " : ", time_taken
 
         if title_regex_extractor:
-            doc = Extractor.extract_title(doc, title_regex_extractor)
-            print pprint.pprint(doc['extractors']['title'], indent=4)
+            try:
+                doc = Extractor.extract_title(doc, title_regex_extractor)
+                # print pprint.pprint(doc['extractors']['title'], indent=4)
+            except:
+                print 'No Title found: ', doc['url']
         return doc
 
     def addTokenizedData(self, doc, matches, index, data):
@@ -437,7 +432,7 @@ class ProcessExtractor(Extractor):
                 # search internal text values
                 table_expr = parse('extractors.tables.text.[*].result.value.tables[*].rows[*].cells[*].text')
                 table_matches = table_expr.find(doc)
-                print str(len(table_matches)) + " : tables cell count"
+                # print str(len(table_matches)) + " : tables cell count"
                 for tIndex in range(len(table_matches)):
                     tValues = table_matches[tIndex].value
                     data = tValues[0]
@@ -462,29 +457,25 @@ class ProcessExtractor(Extractor):
                     doc, crf_tokens = self.addTokensWithAnnotation(doc, matches, index, crf_tokens, content)
         return doc
 
-    @staticmethod
-    def process_inferlink_fields(doc):
-        path = 'extractors.content_strict.data_extractors'
-        for key in inferlink_data_fields.keys():
-            # print key
-            inferlink_fields = inferlink_data_fields[key]
-            for field in inferlink_fields:
-                if field in doc:
-                    # print "BEFORE"
-                    # pp.pprint(doc['extractors']['content_strict']['data_extractors'])
-                    # print field
-                    # print doc[field][0]['result']['value']
-                    print "Adding %s to %s" % (field, key)
-                    # print path + "." + key
-                    identity_extractor = LambdaExtractor(field).set_extract_function(lambda x: x) \
-                        .set_metadata({'extractor': 'inferlink', 'input_type': ['text']})
-                    identity_processor = ExtractorProcessor() \
-                        .set_input_fields(field + "[*].result.value") \
-                        .set_output_fields(path + "." + key).set_extractor(identity_extractor)
-                    # print identitity_processor.get_extractor().extract(doc[field][0]['result']['value'])
-                    doc = identity_processor.extract(doc)
-                    # print "AFTER"
-                    # pp.pprint(doc['extractors']['content_strict']['data_extractors'])
+    def process_inferlink_fields(self, doc):
+        if self.landmark:
+            self.landmark.set_output_field('landmarks')
+            self.landmark.output_fields = None
+            doc = Extractor.add_tld(Extractor.rename_key('_id', 'cdr_id', Extractor.remove_fields(doc, fields_to_remove)))
+            doc = self.landmark.extract(doc)
+
+            # Not the best to handle this, but here goes nothing
+
+            if 'landmarks' in doc and doc['landmarks']:
+                if 'landmark' not in doc:
+                    doc['landmark'] = dict()
+                landmark_extractions = doc['landmarks']
+                for le in landmark_extractions:
+                    val = le['result']['value']
+                    for key in val.keys():
+                        doc['landmark'][key] = dict()
+                        doc['landmark'][key]['text'] = val[key]
+        doc.pop('landmarks', None)
         return doc
 
     def string_to_json(self, source):
