@@ -57,17 +57,31 @@ inferlink_data_fields = {
     'gender': ['inferlink_gender']
 }
 
-inverse_inferlink_data_fields = {'inferlink_price': 'price', 'inferlink_posting-date': 'posting-date',
-                                 'inferlink_posting-date-2': 'posting-date', 'inferlink_location': 'location',
-                                 'inferlink_age-2': 'age', 'inferlink_height': 'height', 'inferlink_country': 'country',
-                                 'inferlink_name': 'name', 'inferlink_city': 'city', 'inferlink_gender': 'gender',
-                                 'inferlink_age': 'age', 'inferlink_ethnicity': 'ethnicity', 'inferlink_phone': 'phone',
-                                 'inferlink_state': 'state', 'inferlink_location-1': 'location',
-                                 'inferlink_hair-color': 'hair_color', 'inferlink_location-3': 'location',
-                                 'inferlink_location-2': 'location', 'inferlink_age-1': 'age',
-                                 'inferlink_posting-date-1': 'posting-date', 'inferlink_weight': 'weight',
-                                 'inferlink_price-1': 'price', 'inferlink_price-2': 'price',
-                                 'inferlink_price-3': 'price', 'inferlink_eye-color': 'eye_color'
+inverse_inferlink_data_fields = {'inferlink_price': 'price',
+                                 'inferlink_posting-date': 'posting-date',
+                                 'inferlink_posting-date-2': 'posting-date',
+                                 'inferlink_location': 'location',
+                                 'inferlink_age-2': 'age',
+                                 'inferlink_height': 'height',
+                                 'inferlink_country': 'country',
+                                 'inferlink_name': 'name',
+                                 'inferlink_city': 'city',
+                                 'inferlink_gender': 'gender',
+                                 'inferlink_age': 'age',
+                                 'inferlink_ethnicity': 'ethnicity',
+                                 'inferlink_phone': 'phone',
+                                 'inferlink_state': 'state',
+                                 'inferlink_location-1': 'location',
+                                 'inferlink_hair-color': 'hair_color',
+                                 'inferlink_location-3': 'location',
+                                 'inferlink_location-2': 'location',
+                                 'inferlink_age-1': 'age',
+                                 'inferlink_posting-date-1': 'posting-date',
+                                 'inferlink_weight': 'weight',
+                                 'inferlink_price-1': 'price',
+                                 'inferlink_price-2': 'price',
+                                 'inferlink_price-3': 'price',
+                                 'inferlink_eye-color': 'eye_color'
                                  }
 
 
@@ -148,6 +162,33 @@ eye_color_dictionary_extractor_init = DictionaryExtractor() \
     'properties_key': 'eyecolor',  # !Important
 }) \
     .set_include_context(True)
+
+data_extractors = [
+            # phone_extractor_init,
+            age_extracor_init,
+            city_dictionary_extractor_init,
+            hair_color_dictionary_extractor_init,
+            eye_color_dictionary_extractor_init,
+            name_regex_extractor_init
+        ]
+inferlink_type_to_extractor_map = {
+    'name': [name_regex_extractor_init],
+    'posting-date': None,
+    'location': [city_dictionary_extractor_init],
+    'city': [city_dictionary_extractor_init],
+    'state': None,
+    'country': None,
+    # 'phone': [phone_extractor_init],
+    'phone': None,
+    'age': None,
+    'ethnicity': None,
+    'hair_color': [hair_color_dictionary_extractor_init],
+    'weight': None,
+    'price': None,
+    'height': None,
+    'eye_color': [eye_color_dictionary_extractor_init],
+    'gender': None
+}
 
 class LambdaExtractor(SuperExtractor):
 
@@ -290,14 +331,6 @@ class ProcessExtractor(Extractor):
         """ Initialize all data extractors and return only extractors that are included
             in the execution request chain
         """
-        data_extractors = [
-            # phone_extractor_init,
-            age_extracor_init,
-            city_dictionary_extractor_init,
-            hair_color_dictionary_extractor_init,
-            eye_color_dictionary_extractor_init,
-            name_regex_extractor_init
-        ]
         res = []
         for extractor in data_extractors:
             metadata = extractor.get_metadata()
@@ -372,7 +405,15 @@ class ProcessExtractor(Extractor):
 
     def addDataExtractorValues(self, doc, matches, index, text, simple_tokens):
         extractions = {}
-        for extractor in self.data_extractors:
+        data_extractors = self.data_extractors
+        # print matches[index].value
+        # print text
+        if 'source' in text and text['source'] == 'landmark' and text['type'] != 'nothing':
+            if text['type'] in inferlink_type_to_extractor_map and inferlink_type_to_extractor_map[text['type']]:
+                data_extractors = inferlink_type_to_extractor_map[text['type']]
+                print "ayyy"
+                print data_extractors
+        for extractor in data_extractors:
             metadata = extractor.get_metadata()
             inputs = metadata['input_type']
             key = metadata['semantic_type']
@@ -392,9 +433,10 @@ class ProcessExtractor(Extractor):
                 continue
             if not extraction:
                 continue
-            result = {'value': extraction}
+            # print extraction
+            # result = {'value': extraction}
             metadata = extractor.get_metadata()
-            metadata['result'] = result
+            metadata['result'] = extraction
             metadata['source'] = 'tokens'
             extractions[key] = [metadata]
         if extractions:
@@ -415,7 +457,7 @@ class ProcessExtractor(Extractor):
                 if 'tokens' not in input_type:
                     print "ignoring ", extractor, " as tokens not dependant.."
                     continue
-                data = extraction['result']['value']
+                data = extraction['result']
                 for values in data:
                     start = values['context']['start']
                     end = values['context']['end']
@@ -493,7 +535,7 @@ class ProcessExtractor(Extractor):
                         if key in inverse_inferlink_data_fields:
                             semantic_type = inverse_inferlink_data_fields[key]
                         else:
-                            semantic_type = ''
+                            semantic_type = 'nothing'
                         landmark[key] = dict()
                         landmark[key]['text'] = list()
                         e_value = l_result[key]
@@ -502,10 +544,9 @@ class ProcessExtractor(Extractor):
                         for value in e_value:
                             r_obj = dict()
                             r_obj['result'] = dict()
-                            # print key
-                            # print l_result[key]
                             r_obj['result']['value'] = value['value']
                             r_obj['type'] = semantic_type
+                            r_obj['source'] = 'landmark'
                             landmark[key]['text'].append(r_obj)
                             # print pprint.pprint(doc['landmark'][key]['text'], indent=4)
 
