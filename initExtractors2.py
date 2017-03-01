@@ -349,16 +349,19 @@ class ProcessExtractor(Extractor):
     def addTokenizedData(self, doc, matches, index, data):
         crf_tokens = []
         r = data['result']
+        # print "R:", r
         if isinstance(r, list):
             # Currently for title, as it uses extractor processor
             # TODO fix this, should be generic
             r = r[0]
         if r['value']:
             temp = {'text': r['value']}
+            # print "Rvalue:", r['value']
             tokens = Extractor.execute_extractor(tokenizer_extractor, temp)
-            crf_tokens = tokens[0]
-            result = [{'result': {'value': crf_tokens[0]}}]
-            doc = self.update_json(doc, matches, 'crf_tokens', result, index, parent=True)
+            if tokens:
+                crf_tokens = tokens[0]
+                result = [{'result': {'value': crf_tokens[0]}}]
+                doc = self.update_json(doc, matches, 'crf_tokens', result, index, parent=True)
         return doc, crf_tokens
 
     def addSimpleTokenizedData(self, doc, matches, index, crf_tokens):
@@ -440,7 +443,7 @@ class ProcessExtractor(Extractor):
         index = 0
         for index in range(len(matches)):
             values = matches[index].value
-            print values
+            # print "VAL:", values
             data, e_type = values[0], values[0]['type']
             if e_type == 'table':
                 # search internal text values
@@ -481,8 +484,8 @@ class ProcessExtractor(Extractor):
             # Not the best to handle this, but here goes nothing
 
             if 'landmarks' in doc and doc['landmarks']:
-                if 'landmark' not in doc:
-                    doc['landmark'] = dict()
+                # print pprint.pprint(doc['landmarks'], indent=4)
+                landmark = dict()
                 landmark_extractions = doc['landmarks']
                 for le in landmark_extractions:
                     l_result = le['result']
@@ -491,14 +494,24 @@ class ProcessExtractor(Extractor):
                             semantic_type = inverse_inferlink_data_fields[key]
                         else:
                             semantic_type = ''
-                        doc['landmark'][key] = dict()
-                        doc['landmark'][key]['text'] = list()
-                        r_obj = dict()
-                        r_obj['result'] = dict()
-                        r_obj['result']['value'] = l_result[key]['value']
-                        r_obj['type'] = semantic_type
-                        doc['landmark'][key]['text'].append(r_obj)
+                        landmark[key] = dict()
+                        landmark[key]['text'] = list()
+                        e_value = l_result[key]
+                        if isinstance(e_value, dict):
+                            e_value = [e_value]
+                        for value in e_value:
+                            r_obj = dict()
+                            r_obj['result'] = dict()
+                            # print key
+                            # print l_result[key]
+                            r_obj['result']['value'] = value['value']
+                            r_obj['type'] = semantic_type
+                            landmark[key]['text'].append(r_obj)
+                            # print pprint.pprint(doc['landmark'][key]['text'], indent=4)
+
+                doc['landmark'] = landmark
         doc.pop('landmarks', None)
+        # pprint.pprint(doc['landmark'], indent=2)
         return doc
 
     def string_to_json(self, source):
