@@ -8,9 +8,11 @@ from jsonpath_rw import parse, jsonpath
 
 from digIlpRankings import ilp_extractions
 
-
 TITLE_WEIGHT = 1.0
-TEXT_WEIGHT = 0.5
+RELAXED_TEXT_WEIGHT = 0.4
+STRICT_TEXT_WEIGHT = 0.5
+LANDMARK_WEIGHT = 1.0
+DEFAULT_WEIGHT = 0.5
 
 class ProcessILP():
   """ Class to process ILP """
@@ -23,28 +25,34 @@ class ProcessILP():
     'city_all': properties['city_all']
     })
 
+  def _get_weight(self, path):
+    if("landmark." in path):
+      return LANDMARK_WEIGHT
+    elif(".content_relaxed." in path):
+      return RELAXED_TEXT_WEIGHT
+    elif(".content_strict" in path):
+      return STRICT_TEXT_WEIGHT
+    elif(".title." in path):
+      return TITLE_WEIGHT
+    return DEFAULT_WEIGHT
+
   def run_ilp(self, doc):
-    expression = 'extractors.*.crf_tokens'
+    expression = '*.*.crf_tokens'
     jsonpath_expr = parse(expression)
     matches = jsonpath_expr.find(doc)
 
-    # TODO: Need to rewrite this so that it handles tokens from multiple sources
+    tokens_input = []
+
     for match in matches:
       val, path = match.value, str(match.full_path)
-      
-      tokens = val[0]['result'][0]['value']
 
-      tokens_input = [{
-        "tokens":tokens,
-        "source":"text",
-        "weight":TEXT_WEIGHT
-      }]
+      tokens_input.append({
+        "tokens": val,
+        "source": path,
+        "weight": self._get_weight(path)
+        })
 
-      self.ilp_formulation.formulate_ILP(tokens_input)
-
-      updated_tokens = tokens_input[0]['tokens']
-
-      val[0]['result'][0]['value'] = updated_tokens
+    self.ilp_formulation.formulate_ILP(tokens_input)
 
     return doc
     

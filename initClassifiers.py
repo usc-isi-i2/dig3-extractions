@@ -26,7 +26,7 @@ class ProcessClassifier():
       self.extractors.append(extractor)
 
   def classify_extractions(self, doc):
-    expression = 'extractors.*.crf_tokens'
+    expression = '*.*.crf_tokens'
     jsonpath_expr = parse(expression)
     matches = jsonpath_expr.find(doc)
     for match in matches:
@@ -34,11 +34,9 @@ class ProcessClassifier():
       
       for extractor in self.extractors:
 
-        tokens = val[0]['result'][0]['value']
+        tokens = val
 
-        updated_tokens = extractor.classify(tokens)
-
-        val[0]['result'][0]['value'] = updated_tokens
+        extractor.classify(tokens)
 
     return doc
 
