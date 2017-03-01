@@ -20,7 +20,7 @@ from landmark_extractor.extraction.Landmark import RuleSet
 """This is just for reference
 inferlink_field_names = [
                          {'name': ['inferlink_name']},
-                         {'posting-date': ['inferlink_posting-date', 'inferlink_posting-date-2',
+                         {'posting_date': ['inferlink_posting-date', 'inferlink_posting-date-2',
                                            'inferlink_posting-date-1']},
                          {'location': ['inferlink_city', 'inferlink_state','inferlink_country', 'inferlink_location',
                                        'inferlink_location-1', 'inferlink_location-2','inferlink_location-3']},
@@ -39,7 +39,7 @@ inferlink_field_names = [
 """
 inferlink_data_fields = {
     'name': ['inferlink_name'],
-    'posting-date': ['inferlink_posting-date', 'inferlink_posting-date-2',
+    'posting_date': ['inferlink_posting-date', 'inferlink_posting-date-2',
                      'inferlink_posting-date-1'],
     'location': ['inferlink_location', 'inferlink_location-1',
                  'inferlink_location-2','inferlink_location-3'],
@@ -58,8 +58,8 @@ inferlink_data_fields = {
 }
 
 inverse_inferlink_data_fields = {'inferlink_price': 'price',
-                                 'inferlink_posting-date': 'posting-date',
-                                 'inferlink_posting-date-2': 'posting-date',
+                                 'inferlink_posting-date': 'posting_date',
+                                 'inferlink_posting-date-2': 'posting_date',
                                  'inferlink_location': 'location',
                                  'inferlink_age-2': 'age',
                                  'inferlink_height': 'height',
@@ -76,7 +76,7 @@ inverse_inferlink_data_fields = {'inferlink_price': 'price',
                                  'inferlink_location-3': 'location',
                                  'inferlink_location-2': 'location',
                                  'inferlink_age-1': 'age',
-                                 'inferlink_posting-date-1': 'posting-date',
+                                 'inferlink_posting-date-1': 'posting_date',
                                  'inferlink_weight': 'weight',
                                  'inferlink_price-1': 'price',
                                  'inferlink_price-2': 'price',
@@ -164,7 +164,7 @@ eye_color_dictionary_extractor_init = DictionaryExtractor() \
     .set_include_context(True)
 
 data_extractors = [
-            # phone_extractor_init,
+            phone_extractor_init,
             age_extracor_init,
             city_dictionary_extractor_init,
             hair_color_dictionary_extractor_init,
@@ -173,21 +173,21 @@ data_extractors = [
         ]
 inferlink_type_to_extractor_map = {
     'name': [name_regex_extractor_init],
-    'posting-date': None,
+    'posting_date': [],
     'location': [city_dictionary_extractor_init],
     'city': [city_dictionary_extractor_init],
-    'state': None,
-    'country': None,
-    # 'phone': [phone_extractor_init],
-    'phone': None,
-    'age': None,
-    'ethnicity': None,
+    'state': [],
+    'country': [],
+    'phone': [phone_extractor_init],
+    'age': [],
+    'ethnicity': [],
     'hair_color': [hair_color_dictionary_extractor_init],
-    'weight': None,
-    'price': None,
-    'height': None,
+    'weight': [],
+    'price': [],
+    'height': [],
     'eye_color': [eye_color_dictionary_extractor_init],
-    'gender': None
+    'gender': [],
+    'nothing': []
 }
 
 class LambdaExtractor(SuperExtractor):
@@ -405,21 +405,26 @@ class ProcessExtractor(Extractor):
 
     def addDataExtractorValues(self, doc, matches, index, text, simple_tokens):
         extractions = {}
-        data_extractors = self.data_extractors
-        # print matches[index].value
-        # print text
-        if 'source' in text and text['source'] == 'landmark' and text['type'] != 'nothing':
+
+        if 'source' in text and text['source'] == 'landmark':
             if text['type'] in inferlink_type_to_extractor_map and inferlink_type_to_extractor_map[text['type']]:
                 data_extractors = inferlink_type_to_extractor_map[text['type']]
-                print "ayyy"
-                print data_extractors
+            else:
+                data_extractors = []
+        else:
+            data_extractors = self.data_extractors
+
         for extractor in data_extractors:
             metadata = extractor.get_metadata()
             inputs = metadata['input_type']
             key = metadata['semantic_type']
 
             if 'tokens' in inputs:
-                temp = {'tokens': simple_tokens}
+                if 'extractor' in metadata and metadata['extractor'] == 'phone':
+                    temp = {'input': simple_tokens}
+                else:
+                    temp = {'tokens': simple_tokens}
+
                 extraction = Extractor.execute_extractor(extractor, temp)
             elif 'text' in inputs:
                 r = text['result']
@@ -436,12 +441,31 @@ class ProcessExtractor(Extractor):
             # print extraction
             # result = {'value': extraction}
             metadata = extractor.get_metadata()
+            if 'extractor' in metadata and metadata['extractor'] == 'phone':
+                extraction = ProcessExtractor.format_phone_output(extraction)
+            # else:
+            #     print 'something else'
+            #     print extraction
             metadata['result'] = extraction
             metadata['source'] = 'tokens'
             extractions[key] = [metadata]
         if extractions:
             doc = self.update_json(doc, matches, 'data_extractors', extractions, index, parent=True)
         return doc, extractions
+
+    @staticmethod
+    def format_phone_output(phones):
+        # TODO this should be done by extractor in future
+        out_phones = list()
+        if isinstance(phones, list):
+            for phone in phones:
+                if isinstance(phone, basestring):
+                    out = dict()
+                    out['value'] = phone
+                    out_phones.append(out)
+        if len(out_phones) > 0:
+            return out_phones
+        return phones
 
     def annotateTokenToExtractions(self, tokens, extractions):
         for extractor, extractions in extractions.iteritems():
