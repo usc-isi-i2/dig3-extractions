@@ -3,6 +3,7 @@ from optparse import OptionParser
 import codecs
 from Normalize import N as NO
 import time
+from jsonpath_rw import parse, jsonpath
 
 SEM_TYPES = 'semantic_types'
 SEM_TYPE = 'semantic_type'
@@ -94,6 +95,7 @@ def create_field_object(obj_dedup_semantic_types, value_type, value, field_name,
         debug = True
     if debug:
         print "Input value %s" % (value)
+        print obj_dedup_semantic_types[field_name]
     if field_name in normalize_conf:
         f_conf = normalize_conf[field_name]
         func = getattr(N, f_conf['function'])
@@ -184,51 +186,126 @@ def consolidate_extractor_values(extraction):
     return out
 
 
+def get_strict_crf_tokens(doc):
+    strict_crf_tokens_paths = ['landmark.*.crf_tokens', 'extractors.content_strict.crf_tokens']
+    strict_crf_tokens = list()
+    for path in strict_crf_tokens_paths:
+        expr = parse(path)
+        matches = expr.find(doc)
+        for match in matches:
+            # print match.full_path
+            strict_crf_tokens.extend(match.value)
+    return strict_crf_tokens
+
+
+def get_relaxed_crf_tokens(doc):
+    relaxed_crf_tokens_paths = ['extractors.content_relaxed.crf_tokens']
+    relaxed_crf_tokens = list()
+    for path in relaxed_crf_tokens_paths:
+        expr = parse(path)
+        matches = expr.find(doc)
+        for match in matches:
+            # print match.full_path
+            relaxed_crf_tokens.extend(match.value)
+    return relaxed_crf_tokens
+
+
+def handle_strict_data_extractions(doc, semantic_type_objs, obj_dedup_semantic_types, N):
+    strict_de_paths = ['landmark.*.data_extractors', 'extractors.content_strict.data_extractors',
+                       'extractors.title.data_extractors']
+    for path in strict_de_paths:
+        expr = parse(path)
+        matches = expr.find(doc)
+        for match in matches:
+            # print match.full_path
+            de = match.value
+            for key in de.keys():
+                extraction = consolidate_extractor_values(de[key])
+                semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(
+                            semantic_type_objs, obj_dedup_semantic_types,
+                            key, extraction, 'strict',
+                            normalize_conf, N)
+    return semantic_type_objs, obj_dedup_semantic_types
+
+
+def handle_relaxed_data_extractions(doc, semantic_type_objs, obj_dedup_semantic_types, N):
+    relaxed_de_paths = ['extractors.content_relaxed.data_extractors']
+    for path in relaxed_de_paths:
+        expr = parse(path)
+        matches = expr.find(doc)
+        for match in matches:
+            # print match.full_path
+            de = match.value
+            for key in de.keys():
+                extraction = consolidate_extractor_values(de[key])
+                semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(
+                            semantic_type_objs, obj_dedup_semantic_types,
+                            key, extraction, 'relaxed',
+                            normalize_conf, N)
+    return semantic_type_objs, obj_dedup_semantic_types
+
+
 def consolidate_semantic_types(doc, normalize_conf, N):
     semantic_type_objs = dict()
     obj_dedup_semantic_types = dict()
 
+    #  handle semantic types from strict crf tokens
+    strict_crf_tokens = get_strict_crf_tokens(doc)
+    strict_semantic_types = get_value_sem_type(strict_crf_tokens)
+    if strict_semantic_types:
+        for key in strict_semantic_types.keys():
+            semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(
+                semantic_type_objs, obj_dedup_semantic_types, key, strict_semantic_types[key], 'strict',
+                normalize_conf, N)
+
+    # handle semantic types from relaxed crf tokens
+    relaxed_crf_tokens = get_relaxed_crf_tokens(doc)
+    relaxed_semantic_types = get_value_sem_type(relaxed_crf_tokens)
+    if relaxed_semantic_types:
+        for key in relaxed_semantic_types.keys():
+            semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(
+                semantic_type_objs, obj_dedup_semantic_types,
+                key, relaxed_semantic_types[key],
+                'relaxed', normalize_conf, N)
+
+    # handle strict data extractions
+    semantic_type_objs, obj_dedup_semantic_types = handle_strict_data_extractions(doc, semantic_type_objs,
+                                                                                  obj_dedup_semantic_types, N)
+
+    # handle relaxed data extractions
+    semantic_type_objs, obj_dedup_semantic_types = handle_relaxed_data_extractions(doc, semantic_type_objs,
+                                                                                  obj_dedup_semantic_types, N)
+    landmark = None
+    if 'landmark' in doc:
+        landmark = doc['landmark']
+
     if 'extractors' in doc:
         extractors = doc['extractors']
+
+        # handle title first
+        title = None
+        if 'title' in extractors:
+            title = extractors['title']['text'][0]['result'][0]
+        elif landmark and 'inferlink_title' in landmark:
+            title = landmark['inferlink_title']['text'][0]['result']
+        if title:
+            title = [title]
+            semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(semantic_type_objs,
+                                                                                                 obj_dedup_semantic_types,
+                                                                                                 'title', title,
+                                                                                                 'strict',
+                                                                                                 normalize_conf, N)
+            semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(semantic_type_objs,
+                                                                                                 obj_dedup_semantic_types,
+                                                                                                 'title', title,
+                                                                                                 'relaxed',
+                                                                                                 normalize_conf, N)
+        # now strict semantic types
         if 'content_strict' in extractors:
             content_strict = extractors['content_strict']
-            if 'crf_tokens' in content_strict:
-                strict_crf_tokens = content_strict['crf_tokens'][0]['result'][0]['value']
-                strict_semantic_types = get_value_sem_type(strict_crf_tokens)
-                if strict_semantic_types:
-                    for key in strict_semantic_types.keys():
-                        semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(
-                            semantic_type_objs, obj_dedup_semantic_types, key, strict_semantic_types[key], 'strict',
-                            normalize_conf, N)
-            if 'data_extractors' in content_strict:
-                de_strict = content_strict['data_extractors']
-                for key in de_strict.keys():
-                    extraction = consolidate_extractor_values(de_strict[key])
-                    semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(
-                        semantic_type_objs, obj_dedup_semantic_types,
-                        key, extraction, 'strict',
-                        normalize_conf, N)
-
-            title = None
-            if 'title' in content_strict:
-                title = content_strict['title'][0]['result'][0]
-            elif 'inferlink_title' in doc:
-                title = doc['inferlink_title'][0]['result']
-            if title:
-                title = [title]
-                semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(semantic_type_objs,
-                                                                                                     obj_dedup_semantic_types,
-                                                                                                     'title', title,
-                                                                                                     'strict',
-                                                                                                     normalize_conf, N)
-                semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(semantic_type_objs,
-                                                                                                     obj_dedup_semantic_types,
-                                                                                                     'title', title,
-                                                                                                     'relaxed',
-                                                                                                     normalize_conf, N)
             description = None
-            if 'inferlink_description' in doc:
-                description = doc['inferlink_description'][0]['result']
+            if landmark and 'inferlink_description' in landmark:
+                description = landmark['inferlink_description']['text'][0]['result']
             elif 'text' in content_strict:
                 description = content_strict['text'][0]['result']
             if description:
@@ -242,24 +319,6 @@ def consolidate_semantic_types(doc, normalize_conf, N):
 
         if 'content_relaxed' in extractors:
             content_relaxed = extractors['content_relaxed']
-            if 'crf_tokens' in content_relaxed:
-                relaxed_crf_tokens = content_relaxed['crf_tokens'][0]['result'][0]['value']
-                relaxed_semantic_types = get_value_sem_type(relaxed_crf_tokens)
-                if relaxed_semantic_types:
-                    for key in relaxed_semantic_types.keys():
-                        semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(
-                            semantic_type_objs, obj_dedup_semantic_types,
-                            key, relaxed_semantic_types[key],
-                            'relaxed', normalize_conf, N)
-            if 'data_extractors' in content_relaxed:
-                de_relaxed = content_relaxed['data_extractors']
-                for key in de_relaxed.keys():
-                    extraction = consolidate_extractor_values(de_relaxed[key])
-                    semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(
-                        semantic_type_objs, obj_dedup_semantic_types,
-                        key, extraction, 'relaxed',
-                        normalize_conf, N)
-
             description = None
             if 'text' in content_relaxed:
                 description = content_relaxed['text'][0]['result']

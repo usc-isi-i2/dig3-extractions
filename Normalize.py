@@ -348,3 +348,11 @@ class N(object):
         o = dict()
         o['name'] = x
         return o
+
+    @staticmethod
+    def clean_phone(x, conf=None):
+        x = x['value']
+        o = dict()
+        o['name'] = x
+        o['key'] = x
+        return o
