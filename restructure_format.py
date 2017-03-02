@@ -95,7 +95,6 @@ def create_field_object(obj_dedup_semantic_types, value_type, value, field_name,
         debug = True
     if debug:
         print "Input value %s" % (value)
-        print obj_dedup_semantic_types[field_name]
     if field_name in normalize_conf:
         f_conf = normalize_conf[field_name]
         func = getattr(N, f_conf['function'])
@@ -105,14 +104,8 @@ def create_field_object(obj_dedup_semantic_types, value_type, value, field_name,
         if end_time > .05:
             print "Time taken to normalize %s : %f" % (value['value'], end_time)
         if o:
-            if o['name'] not in obj_dedup_semantic_types[field_name][value_type]:
-                obj_dedup_semantic_types[field_name][value_type].append(o['name'])
-                if debug:
-                    print "Output 1 %s" % (o)
-                return o, obj_dedup_semantic_types
-            return None, obj_dedup_semantic_types
+            return check_if_value_exists(o, obj_dedup_semantic_types, field_name, value_type)
         else:
-            out['key'] = ''
             out['name'] = value['value']
             if debug:
                 print "Output 2 %s" % (out)
@@ -123,6 +116,18 @@ def create_field_object(obj_dedup_semantic_types, value_type, value, field_name,
     if debug:
         print "Output 3 %s" % (out)
     return out, obj_dedup_semantic_types
+
+
+def check_if_value_exists(obj, dedup_list, field_name, value_type):
+    out_list = list()
+    if isinstance(obj, dict):
+        obj = [obj]
+    for o in obj:
+        if o['name'] not in dedup_list[field_name][value_type]:
+            dedup_list[field_name][value_type].append(o['name'])
+            out_list.append(o)
+    # print json.dumps(dedup_list)
+    return (out_list, dedup_list) if len(out_list) > 0 else (None, dedup_list)
 
 
 def add_objects_to_semantic_types_for_gui(obj_semantic_types, obj_dedup_semantic_types, semantic_type, values,
@@ -152,7 +157,7 @@ def add_objects_to_semantic_types_for_gui(obj_semantic_types, obj_dedup_semantic
 
                 if out:
                     # print "1. Appending to %s %s %s" % (semantic_type, value_type, out)
-                    if isinstance(out,list):
+                    if isinstance(out, list):
                         obj_semantic_types[semantic_type][value_type].extend(out)
                     else:
                         obj_semantic_types[semantic_type][value_type].append(out)
@@ -349,13 +354,15 @@ if __name__ == "__main__":
 
     lines = codecs.open(input_file, 'r').readlines()
     o = codecs.open(output_file, 'w')
-
+    i = 1
     for line in lines:
         x = json.loads(line)
         s_t = time.time()
+        print 'processing line # %d' % (i)
         o.write(json.dumps(consolidate_semantic_types(x, normalize_conf, N_O)))
         e_t = time.time() - s_t
         if e_t > 1.0:
             print "Time taken to normalize %s : %f" % (json.loads(line)['doc_id'], e_t)
         o.write('\n')
+        i += 1
     o.close()

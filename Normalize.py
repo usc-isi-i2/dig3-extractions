@@ -112,7 +112,8 @@ class N(object):
         :return: height in centimeters
         """
         centimeters = None
-        x = x['value']
+        if 'value' in x:
+            x = x['value']
         if isinstance(x, basestring):
             stripped = x.strip().lower()
             # take only first measurement of any range
@@ -139,11 +140,10 @@ class N(object):
             except:
                 return None
         if isinstance(x, dict):
-            print x
-            # centimeters = N.unit_conversion(x['foot'], 'ft', 'cm') + N.unit_conversion(x['inch'], 'in', 'cm')
-            if 'centimeter' in x:
+            x = x['height']
+            o_list = list()
+            if 'centimeter' in x and len(x['centimeter']) > 0:
                 centimeters_list = x['centimeter']
-                o_list = list()
                 for centimeters in centimeters_list:
                     if N.sanity_check_values(centimeters, conf) is not None:
                         o = dict()
@@ -151,11 +151,17 @@ class N(object):
                         o['key'] = centimeters
                         o['search'] = N.convert_height_all_units(centimeters)
                         o_list.append(o)
-                        if len(o_list) > 0:
-                            return o_list
-            else:
 
-                print 'YOU DONE MESSED UP:', x
+                    if len(o_list) > 0:
+                        # print o_list
+                        return o_list
+            else:
+                # case where the  returned a raw foot value but no centimeters
+                # {u'foot': [], u'raw': [{u'foot': 2.0}], u'centimeter': []}
+                o = dict()
+                o['name'] = x['raw'][0]['foot']
+                o_list.append(o)
+                return o_list
         return None
 
     @staticmethod
@@ -183,7 +189,8 @@ class N(object):
 
         def lb_to_kg(lb):
             return float(lb) / 2.2
-        x = x['value']
+        if 'value' in x:
+            x = x['value']
         if isinstance(x, basestring):
             """In kg.unmarked weight < 90 is interpreted as kg, >=90 as lb"""
             x = str(x).strip().lower()
@@ -247,18 +254,19 @@ class N(object):
                 return None
 
         if isinstance(x, dict):
+            x = x['weight']
             o_list = list()
             weight_list = x['kilogram']
             for clean_weight_value in weight_list:
                 clean_weight_value = float(clean_weight_value)
+                o = dict()
+                o['name'] = clean_weight_value
+                o['search'] = N.convert_weight_all_units(clean_weight_value)
                 if N.sanity_check_values(clean_weight_value, conf) is not None:
-                    o = dict()
-                    o['name'] = clean_weight_value
                     o['key'] = clean_weight_value
-                    o['search'] = N.convert_weight_all_units(clean_weight_value)
-                    o_list.append(o)
-                    if len(o_list) > 0:
-                        return o_list
+                o_list.append(o)
+                if len(o_list) > 0:
+                    return o_list
         return None
 
     @staticmethod
@@ -319,12 +327,8 @@ class N(object):
                 if 'state' in x and 'country' in x and 'longitude' in x and 'latitude' in x:
                     o['key'] = x['value'] + ":" + x['state'] + ":" + x['country'] + ":" + str(x['longitude']) + ":" + \
                            str(x['latitude'])
-                    o['name'] = x['value']
-                else:
-                    o['key'] = x['value']
-                    o['name'] = x['value']
+                o['name'] = x['value']
         else:
-            o['key'] = x
             o['name'] = x
         return o
 

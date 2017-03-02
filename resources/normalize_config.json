@@ -18,7 +18,7 @@
   "weight": {
     "data_type": "numbers.Number",
     "range": {
-      "lower_bound": 40,
+      "lower_bound": 30,
       "upper_bound": 150
     },
     "function": "clean_weight"
