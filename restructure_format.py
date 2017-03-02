@@ -14,6 +14,9 @@ ETHNICITY = 'ethnicity'
 CITY = 'city'
 FIELDS = 'fields'
 probability_threshold = 0.5
+# blacklist for inferlink fields on which we do not want to run normalizer
+# because it's already run or can't be run
+inferlink_blacklist  = ['phone', 'nothing']
 
 def update_semantic_types_token(token, offset):
     sem_types = token[SEM_TYPE]
@@ -91,7 +94,7 @@ def create_field_object(obj_dedup_semantic_types, value_type, value, field_name,
 
     out = dict()
     debug = False
-    if field_name == 'height' or field_name == 'weight':
+    if field_name == 'height' or field_name == 'weight' or field_name == 'location':
         debug = True
     if debug:
         print "Input value %s" % (value)
@@ -104,6 +107,8 @@ def create_field_object(obj_dedup_semantic_types, value_type, value, field_name,
         if end_time > .05:
             print "Time taken to normalize %s : %f" % (value['value'], end_time)
         if o:
+            if debug:
+                print "Output 1 %s" % (o)
             return check_if_value_exists(o, obj_dedup_semantic_types, field_name, value_type)
         else:
             out['name'] = value['value']
@@ -222,7 +227,6 @@ def handle_strict_data_extractions(doc, semantic_type_objs, obj_dedup_semantic_t
         expr = parse(path)
         matches = expr.find(doc)
         for match in matches:
-            # print match.full_path
             de = match.value
             for key in de.keys():
                 extraction = consolidate_extractor_values(de[key])
@@ -230,6 +234,24 @@ def handle_strict_data_extractions(doc, semantic_type_objs, obj_dedup_semantic_t
                             semantic_type_objs, obj_dedup_semantic_types,
                             key, extraction, 'strict',
                             normalize_conf, N)
+
+    # also process landmark extractions except title and description
+    if 'landmark' in doc and doc['landmark']:
+        landmark = doc['landmark']
+        for l_key in landmark.keys():
+            if l_key != 'inferlink_title' and l_key != 'inferlink_description':
+                l_extraction_text = landmark[l_key]['text']
+                # harcoded because type will be same for all values in this path
+                key = l_extraction_text[0]['type']
+                # print key
+                if key not in inferlink_blacklist:
+                    extraction = consolidate_extractor_values(l_extraction_text)
+                    semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(
+                        semantic_type_objs, obj_dedup_semantic_types,
+                        key, extraction, 'strict',
+                        normalize_conf, N)
+
+
     return semantic_type_objs, obj_dedup_semantic_types
 
 

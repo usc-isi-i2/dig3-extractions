@@ -47,6 +47,18 @@
     "data_type": "basestring",
     "function": "clean_city"
   },
+  "state": {
+    "data_type": "basestring",
+    "function": "identity_with_key"
+  },
+  "country": {
+    "data_type": "basestring",
+    "function": "identity_with_key"
+  },
+  "location": {
+    "data_type": "basestring",
+    "function": "identity"
+  },
   "title": {
     "data_type": "basestring",
     "function": "identity"

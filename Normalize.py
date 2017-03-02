@@ -354,6 +354,14 @@ class N(object):
         return o
 
     @staticmethod
+    def identity_with_key(x, conf=None):
+        x = x['value']
+        o = dict()
+        o['name'] = x
+        o['key'] = x
+        return o
+
+    @staticmethod
     def clean_phone(x, conf=None):
         x = x['value']
         o = dict()
