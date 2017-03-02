@@ -57,7 +57,6 @@ dependencies:
   - digAddressExtractor>=0.3.0
   - digPostingDateExtractor>=0.3.0
   - digSocialMediaIdExtractor>=0.3.3
-  - digHeightWeightExtractor>=0.3.0
   - digCollaborativeExtractor>=0.1.6
   - digCityExtractor>=0.3.0
   - digUrlLocalityExtractor>=0.3.0
@@ -66,4 +65,5 @@ dependencies:
   - digILPRankings>=0.3.7
   - digTableExtractor>=0.2.0
   - dateparser>=0.5.1
-
+  - digWeightExtractor>=0.1.0
+  - digHeightExtractor>=0.1.0

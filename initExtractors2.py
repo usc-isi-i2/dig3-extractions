@@ -16,6 +16,8 @@ from digExtractor.extractor_processor import ExtractorProcessor
 from digTokenizerExtractor.tokenizer_extractor import TokenizerExtractor
 from digLandmarkExtractor.get_landmark_extractor_processors import get_multiplexing_landmark_extractor_processor
 from landmark_extractor.extraction.Landmark import RuleSet
+from digHeightExtractor.height_extractor import HeightExtractor
+from digWeightExtractor.weight_extractor import WeightExtractor
 
 """This is just for reference
 inferlink_field_names = [
@@ -163,13 +165,28 @@ eye_color_dictionary_extractor_init = DictionaryExtractor() \
 }) \
     .set_include_context(True)
 
+height_extractor_init = HeightExtractor()\
+            .set_metadata({'extractor': 'height',
+                           'semantic_type': 'height',
+                           'input_type': ['text'],
+                           'type': 'height'})
+
+weight_extractor_init = WeightExtractor()\
+            .set_metadata({'extractor': 'weight',
+                           'semantic_type': 'weight',
+                           'input_type': ['text'],
+                           'type': 'weight'})
+
 data_extractors = [
             phone_extractor_init,
             age_extracor_init,
             city_dictionary_extractor_init,
             hair_color_dictionary_extractor_init,
             eye_color_dictionary_extractor_init,
-            name_regex_extractor_init
+            name_regex_extractor_init,
+            ethnicities_dictionary_extractor_init,
+            height_extractor_init,
+            weight_extractor_init
         ]
 inferlink_type_to_extractor_map = {
     'name': [name_regex_extractor_init],
@@ -180,7 +197,7 @@ inferlink_type_to_extractor_map = {
     'country': [],
     'phone': [phone_extractor_init],
     'age': [],
-    'ethnicity': [],
+    'ethnicity': [ethnicities_dictionary_extractor_init],
     'hair_color': [hair_color_dictionary_extractor_init],
     'weight': [],
     'price': [],
