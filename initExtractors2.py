@@ -31,6 +31,7 @@ from digHeightExtractor.height_extractor import HeightExtractor
 from digWeightExtractor.weight_extractor import WeightExtractor
 from digServiceExtractor.names_helper import get_service_extractor
 from digReviewIDExtractor.review_id_extractor import ReviewIDExtractor
+from digPriceExtractor.price_extractor import PriceExtractor
 
 """This is just for reference
 inferlink_field_names = [
@@ -217,6 +218,12 @@ reviewid_extractor = ReviewIDExtractor().set_metadata({
         'input_type': ['text']
 })
 
+price_extractor = PriceExtractor().set_metadata({
+        'extractor': 'dig_price_regex_extractor',
+        'semantic_type': 'price',
+        'input_type': ['text']
+})
+
 
 data_extractors = [
             phone_extractor_init,
@@ -230,7 +237,8 @@ data_extractors = [
             weight_extractor_init,
             state_dictionary_extractor,
             service_extractor,
-            reviewid_extractor
+            reviewid_extractor,
+            price_extractor
         ]
 inferlink_type_to_extractor_map = {
     'name': [name_regex_extractor_init],

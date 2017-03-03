@@ -94,7 +94,7 @@ def create_field_object(obj_dedup_semantic_types, value_type, value, field_name,
 
     out = dict()
     debug = False
-    if field_name == 'review_id' or field_name == 'service':
+    if field_name == 'price':
         debug = True
     if debug:
         print "Input value %s" % (value)

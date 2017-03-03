@@ -78,5 +78,13 @@
   "review_id": {
     "data_type": "basestring",
     "function": "clean_review_id"
+  },
+   "price": {
+    "data_type": "basestring",
+    "function": "clean_price",
+     "range": {
+       "lower_bound": 0,
+       "upper_bound": 1000
+     }
+    }
   }
-}

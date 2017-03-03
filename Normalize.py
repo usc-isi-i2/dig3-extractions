@@ -334,17 +334,21 @@ class N(object):
 
     @staticmethod
     def sanity_check_values(x, conf):
-        if not x:
-            return x
-        if 'range' in conf:
-            r = conf['range']
-            if not r['lower_bound'] <= int(x) <= r['upper_bound']:
-                print '%s should be in between %s and %s' % (str(x), r['lower_bound'], r['upper_bound'])
+        try:
+            if not x:
+                return x
+            if 'range' in conf:
+                r = conf['range']
+                if not r['lower_bound'] <= int(x) <= r['upper_bound']:
+                    print '%s should be in between %s and %s' % (str(x), r['lower_bound'], r['upper_bound'])
+                    return None
+            if not isinstance(x, eval(conf['data_type'])):
+                print '%s expected to be of type %s, but is of type %s' %(str(x), conf['data_type'], type(x))
                 return None
-        if not isinstance(x, eval(conf['data_type'])):
-            print '%s expected to be of type %s, but is of type %s' %(str(x), conf['data_type'], type(x))
+            return x
+        except Exception as e:
+            print e
             return None
-        return x
 
     @staticmethod
     def identity(x, conf=None):
@@ -379,3 +383,37 @@ class N(object):
         o['name'] = x
         o['key'] = x
         return o
+
+    @staticmethod
+    def clean_price(x, conf):
+        """
+        {u'price': [{u'price': u'25', u'price_unit': u'', u'time_unit': u'ss'}], u'price_per_hour': []}
+        """
+        o_list = list()
+        pphs = None
+        if 'price_per_hour' in x:
+            pphs = x['price_per_hour']
+            for pph in pphs:
+                out = dict()
+                out['name'] = pph + ' $ per hour'
+                v = N.sanity_check_values(pph, conf)
+                if v:
+                    out['key'] = v + ' $ per hour'
+                o_list.append(out)
+        if 'price' in x:
+            ps = x['price']
+            for p in ps:
+                if N.check_if_add_price(p['price'], pphs):
+                        out = dict()
+                        out['name'] = p['price'] + ' ' + p['price_unit'] + ' per ' + p['time_unit']
+                        v = N.sanity_check_values(p['price'], conf)
+                        if v:
+                            out['key'] = v + ' ' + p['price_unit'] + ' per ' + p['time_unit']
+                        o_list.append(out)
+        return o_list
+
+    @staticmethod
+    def check_if_add_price(price, price_per_hour):
+        if not price_per_hour:
+            return True
+        return not (price in price_per_hour)

@@ -154,7 +154,7 @@
                 }
               }
             },
-            "eye-color": {
+            "eye_color": {
               "properties": {
                 "relaxed": {
                   "properties": {
@@ -180,7 +180,7 @@
                 }
               }
             },
-            "hair-color": {
+            "hair_color": {
               "properties": {
                 "strict": {
                   "properties": {
@@ -290,7 +290,7 @@
                 }
               }
             },
-            "posting-date": {
+            "posting_date": {
               "properties": {
                 "strict": {
                   "properties": {
