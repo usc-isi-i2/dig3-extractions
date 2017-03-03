@@ -357,8 +357,8 @@ class N(object):
     def identity_with_key(x, conf=None):
         x = x['value']
         o = dict()
-        o['name'] = x
-        o['key'] = x
+        o['name'] = x.title()
+        o['key'] = x.title()
         return o
 
     @staticmethod

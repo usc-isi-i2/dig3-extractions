@@ -70,5 +70,13 @@
   "phone": {
     "data_type": "basestring",
     "function": "clean_phone"
+  },
+  "service": {
+    "data_type": "basestring",
+    "function": "identity_with_key"
+  },
+  "review_id": {
+    "data_type": "basestring",
+    "function": "identity_with_key"
   }
 }

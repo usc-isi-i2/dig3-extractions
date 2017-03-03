@@ -94,7 +94,7 @@ def create_field_object(obj_dedup_semantic_types, value_type, value, field_name,
 
     out = dict()
     debug = False
-    if field_name == 'height' or field_name == 'weight' or field_name == 'location':
+    if field_name == 'review_id' or field_name == 'service':
         debug = True
     if debug:
         print "Input value %s" % (value)
@@ -221,21 +221,7 @@ def get_relaxed_crf_tokens(doc):
 
 
 def handle_strict_data_extractions(doc, semantic_type_objs, obj_dedup_semantic_types, N):
-    strict_de_paths = ['landmark.*.data_extractors', 'extractors.content_strict.data_extractors',
-                       'extractors.title.data_extractors']
-    for path in strict_de_paths:
-        expr = parse(path)
-        matches = expr.find(doc)
-        for match in matches:
-            de = match.value
-            for key in de.keys():
-                extraction = consolidate_extractor_values(de[key])
-                semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(
-                            semantic_type_objs, obj_dedup_semantic_types,
-                            key, extraction, 'strict',
-                            normalize_conf, N)
-
-    # also process landmark extractions except title and description
+    # process landmark extractions except title and description
     if 'landmark' in doc and doc['landmark']:
         landmark = doc['landmark']
         for l_key in landmark.keys():
@@ -251,6 +237,19 @@ def handle_strict_data_extractions(doc, semantic_type_objs, obj_dedup_semantic_t
                         key, extraction, 'strict',
                         normalize_conf, N)
 
+    strict_de_paths = ['landmark.*.data_extractors', 'extractors.content_strict.data_extractors',
+                       'extractors.title.data_extractors']
+    for path in strict_de_paths:
+        expr = parse(path)
+        matches = expr.find(doc)
+        for match in matches:
+            de = match.value
+            for key in de.keys():
+                extraction = consolidate_extractor_values(de[key])
+                semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(
+                            semantic_type_objs, obj_dedup_semantic_types,
+                            key, extraction, 'strict',
+                            normalize_conf, N)
 
     return semantic_type_objs, obj_dedup_semantic_types
 

@@ -1,3 +1,14 @@
+"""
+To make sure an INFERLINK field is processed, it should be added to following global variables
+    1. inferlink_data_fields
+    2. inverse_inferlink_data_fields
+    3. inferlink_type_to_extractor_map - to run relevant extractor on aa inferlink fields
+
+To ensure a data extractor runs,
+    1. Add it to data_extractors list in this file
+    2. Add it to data _extractors in the main of new_extractor_run2.py
+
+"""
 import json
 import time
 from tldextract import tldextract
@@ -18,6 +29,7 @@ from digLandmarkExtractor.get_landmark_extractor_processors import get_multiplex
 from landmark_extractor.extraction.Landmark import RuleSet
 from digHeightExtractor.height_extractor import HeightExtractor
 from digWeightExtractor.weight_extractor import WeightExtractor
+from digServiceExtractor.names_helper import get_service_extractor
 
 """This is just for reference
 inferlink_field_names = [
@@ -56,7 +68,9 @@ inferlink_data_fields = {
     'price': ['inferlink_price','inferlink_price-1', 'inferlink_price-2', 'inferlink_price-3'],
     'height': ['inferlink_height'],
     'eye_color': ['inferlink_eye-color'],
-    'gender': ['inferlink_gender']
+    'gender': ['inferlink_gender'],
+    'service': ['inferlink_service'],
+    'review_id': ['inferlink_review-id']
 }
 
 inverse_inferlink_data_fields = {'inferlink_price': 'price',
@@ -83,7 +97,9 @@ inverse_inferlink_data_fields = {'inferlink_price': 'price',
                                  'inferlink_price-1': 'price',
                                  'inferlink_price-2': 'price',
                                  'inferlink_price-3': 'price',
-                                 'inferlink_eye-color': 'eye_color'
+                                 'inferlink_eye-color': 'eye_color',
+                                 'inferlink_service' : 'service',
+                                 'inferlink_review-id': 'review_id'
                                  }
 
 
@@ -177,6 +193,24 @@ weight_extractor_init = WeightExtractor()\
                            'input_type': ['text'],
                            'type': 'weight'})
 
+state_dictionary_extractor = DictionaryExtractor() \
+    .set_pre_filter(lambda x: name_filter_regex.match(x)) \
+    .set_pre_process(lambda x: x.lower()) \
+    .set_metadata({
+        'extractor': 'dig_state_dictionary_extractor',
+        'semantic_type': 'state',
+        'input_type': ['tokens'],
+        'type': 'dictionary',  # !Important
+        'properties_key': 'states'  # !Important
+}).set_include_context(True)
+
+service_extractor = get_service_extractor().set_metadata({
+        'extractor': 'dig_service_dictionary_extractor',
+        'semantic_type': 'service',
+        'input_type': ['tokens']
+}).set_include_context(True)
+
+
 data_extractors = [
             phone_extractor_init,
             age_extracor_init,
@@ -186,14 +220,16 @@ data_extractors = [
             name_regex_extractor_init,
             ethnicities_dictionary_extractor_init,
             height_extractor_init,
-            weight_extractor_init
+            weight_extractor_init,
+            state_dictionary_extractor,
+            service_extractor
         ]
 inferlink_type_to_extractor_map = {
     'name': [name_regex_extractor_init],
     'posting_date': [],
     'location': [city_dictionary_extractor_init],
     'city': [city_dictionary_extractor_init],
-    'state': [],
+    'state': [state_dictionary_extractor],
     'country': [],
     'phone': [phone_extractor_init],
     'age': [],
@@ -204,7 +240,9 @@ inferlink_type_to_extractor_map = {
     'height': [],
     'eye_color': [eye_color_dictionary_extractor_init],
     'gender': [],
-    'nothing': []
+    'nothing': [],
+    'service': [service_extractor],
+    'review_id': []
 }
 
 class LambdaExtractor(SuperExtractor):
