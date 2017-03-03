@@ -30,6 +30,7 @@ from landmark_extractor.extraction.Landmark import RuleSet
 from digHeightExtractor.height_extractor import HeightExtractor
 from digWeightExtractor.weight_extractor import WeightExtractor
 from digServiceExtractor.names_helper import get_service_extractor
+from digReviewIDExtractor.review_id_extractor import ReviewIDExtractor
 
 """This is just for reference
 inferlink_field_names = [
@@ -210,6 +211,12 @@ service_extractor = get_service_extractor().set_metadata({
         'input_type': ['tokens']
 }).set_include_context(True)
 
+reviewid_extractor = ReviewIDExtractor().set_metadata({
+        'extractor': 'dig_review_id_regex_extractor',
+        'semantic_type': 'review_id',
+        'input_type': ['text']
+})
+
 
 data_extractors = [
             phone_extractor_init,
@@ -222,7 +229,8 @@ data_extractors = [
             height_extractor_init,
             weight_extractor_init,
             state_dictionary_extractor,
-            service_extractor
+            service_extractor,
+            reviewid_extractor
         ]
 inferlink_type_to_extractor_map = {
     'name': [name_regex_extractor_init],

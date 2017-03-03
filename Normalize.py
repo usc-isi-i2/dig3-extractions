@@ -362,6 +362,17 @@ class N(object):
         return o
 
     @staticmethod
+    def clean_review_id(x, conf=None):
+        if 'value' in x:
+            x = x['value']
+        elif 'identifier' in x:
+            x = x['identifier']
+        o = dict()
+        o['name'] = x
+        o['key'] = x
+        return o
+
+    @staticmethod
     def clean_phone(x, conf=None):
         x = x['value']
         o = dict()
