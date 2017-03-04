@@ -94,7 +94,7 @@ def create_field_object(obj_dedup_semantic_types, value_type, value, field_name,
 
     out = dict()
     debug = False
-    if field_name == 'social_media_id':
+    if field_name == 'address':
         debug = True
     if debug:
         print "Input value %s" % (value)

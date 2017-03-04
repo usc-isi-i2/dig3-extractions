@@ -33,6 +33,7 @@ from digServiceExtractor.names_helper import get_service_extractor
 from digReviewIDExtractor.review_id_extractor import ReviewIDExtractor
 from digPriceExtractor.price_extractor import PriceExtractor
 from digSocialMediaIdExtractor.socialmedia_id_extractor import SocialMediaIdExtractor
+from digAddressExtractor.address_extractor import AddressExtractor
 
 """This is just for reference
 inferlink_field_names = [
@@ -233,6 +234,14 @@ socialmedia_id_extractor = SocialMediaIdExtractor(french_english_words['english'
                                                         'input_type': ['tokens']
                                                 })
 
+address_extractor = AddressExtractor() \
+            .set_include_context(True) \
+            .set_metadata({
+                'extractor': 'dig_address_regex_extractor',
+                'semantic_type': 'address',
+                'input_type': ['text']
+        })
+
 data_extractors = [
             phone_extractor_init,
             age_extracor_init,
@@ -247,7 +256,8 @@ data_extractors = [
             service_extractor,
             reviewid_extractor,
             price_extractor,
-            socialmedia_id_extractor
+            socialmedia_id_extractor,
+            address_extractor
         ]
 inferlink_type_to_extractor_map = {
     'name': [name_regex_extractor_init],

@@ -90,5 +90,9 @@
    "social_media_id": {
     "data_type": "basestring",
     "function": "clean_social_media_id"
+  },
+  "address": {
+    "data_type": "basestring",
+    "function": "identity_with_key"
   }
   }
