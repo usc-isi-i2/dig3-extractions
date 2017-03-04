@@ -86,5 +86,9 @@
        "lower_bound": 0,
        "upper_bound": 1000
      }
-    }
+    },
+   "social_media_id": {
+    "data_type": "basestring",
+    "function": "clean_social_media_id"
+  }
   }

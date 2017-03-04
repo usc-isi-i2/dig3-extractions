@@ -417,3 +417,20 @@ class N(object):
         if not price_per_hour:
             return True
         return not (price in price_per_hour)
+
+    @staticmethod
+    def clean_social_media_id(x, conf=None):
+        """
+        {u'twitter': u'emily'}
+        """
+        print x
+        if isinstance(x, dict):
+            x = [x]
+        o_list = list()
+        for smids in x:
+            for key in smids.keys():
+                o = dict()
+                o['name'] = key + ' ' + smids[key]
+                o['key'] = key + ' ' + smids[key]
+                o_list.append(o)
+        return o_list

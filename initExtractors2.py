@@ -32,6 +32,7 @@ from digWeightExtractor.weight_extractor import WeightExtractor
 from digServiceExtractor.names_helper import get_service_extractor
 from digReviewIDExtractor.review_id_extractor import ReviewIDExtractor
 from digPriceExtractor.price_extractor import PriceExtractor
+from digSocialMediaIdExtractor.socialmedia_id_extractor import SocialMediaIdExtractor
 
 """This is just for reference
 inferlink_field_names = [
@@ -224,6 +225,13 @@ price_extractor = PriceExtractor().set_metadata({
         'input_type': ['text']
 })
 
+french_english_words = json.load(codecs.open('french_english_words.json', 'r'))
+socialmedia_id_extractor = SocialMediaIdExtractor(french_english_words['english'],
+                                                  french_english_words['french']).set_metadata({
+                                                        'extractor': 'dig_social_media_extractor',
+                                                        'semantic_type': 'social_media_id',
+                                                        'input_type': ['tokens']
+                                                })
 
 data_extractors = [
             phone_extractor_init,
@@ -238,7 +246,8 @@ data_extractors = [
             state_dictionary_extractor,
             service_extractor,
             reviewid_extractor,
-            price_extractor
+            price_extractor,
+            socialmedia_id_extractor
         ]
 inferlink_type_to_extractor_map = {
     'name': [name_regex_extractor_init],
@@ -343,6 +352,9 @@ class Extractor(object):
         try:
             start_time = time.time()
             output = extractor.extract(doc)
+            metadata =  extractor.get_metadata()
+            if 'semantic_type' in metadata and metadata['semantic_type'] == 'social_media_id':
+                print output
             time_taken = time.time() - start_time
             if time_taken > 5.0:
                 print "Extractor %s took %s seconds for %s" % (extractor.get_name(), str(time_taken), doc['url'])
@@ -540,7 +552,7 @@ class ProcessExtractor(Extractor):
 
     def annotateTokenToExtractions(self, tokens, extractions):
         for extractor, extractions in extractions.iteritems():
-            if extractor in ['phone']:
+            if extractor in ['phone', 'social_media_id']:
                 " ignoring phone annotation.."
                 continue
             for extraction in extractions:
