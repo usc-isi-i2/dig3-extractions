@@ -1,0 +1,23 @@
+{
+  "names_low_precision": "/Users/amandeep/Github/dig-dictionaries/person-names/female-names-master.json",
+  "names_high_precision": "/Users/amandeep/Github/dig-dictionaries/person-names/female-names-trimmed.json",
+  "ethnicities": "/Users/amandeep/Github/dig-dictionaries/ethnicities/ethnicities.json",
+  "cities": "/Users/amandeep/Github/dig-dictionaries/geonames-populated-places/curated_cities.json",
+ "haircolor": "/Users/amandeep/Github/dig-dictionaries/haircolor/haircolors-customized.json",
+  "eyecolor": "/Users/amandeep/Github/dig-dictionaries/eyecolor/eyecolors-customized.json",
+  "states": "/Users/amandeep/Github/dig-dictionaries/geonames-populated-places/states_usa_canada.json",
+  "stop_words": "/Users/amandeep/Github/dig-dictionaries/geonames-populated-places/stop_words.json",
+  "country_codes_dict": "/Users/amandeep/Github/dig-dictionaries/geonames-populated-places/country_codes_dict.json",
+  "countries": "/Users/amandeep/Github/dig-dictionaries/geonames-populated-places/countries.json",
+  "cities_without_spaces": "/Users/amandeep/Github/dig-dictionaries/geonames-populated-places/cities_without_spaces.json",
+  "english_words": "/Users/amandeep/Github/dig-dictionaries/spell-check/english.json",
+  "us_canada_states": "/Users/amandeep/Github/dig-dictionaries/geonames-populated-places/states_usa_canada.json",
+  "french_words": "/Users/amandeep/Github/dig-dictionaries/spell-check/french.json",
+  "state_country":"/Users/amandeep/Github/dig-dictionaries/geonames-populated-places/state_country_dict.json",
+  "city_country": "/Users/amandeep/Github/dig-dictionaries/geonames-populated-places/city_country_dict_15000.json",
+  "phone2city": "/Users/amandeep/Github/dig-memex-2016/dictionaries/phone2city_dict.json",
+  "city_state": "/Users/amandeep/Github/dig-dictionaries/geonames-populated-places/city_state_dict.json",
+  "city_alt": "/Users/amandeep/Github/dig-dictionaries/geonames-populated-places/city_dict_alt_15000.json",
+  "city_all": "/Users/amandeep/Github/dig-dictionaries/geonames-populated-places/city_dict_15000.json"
+
+}
