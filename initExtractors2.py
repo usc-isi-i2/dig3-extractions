@@ -242,6 +242,18 @@ address_extractor = AddressExtractor() \
                 'input_type': ['text']
         })
 
+names_dictionary_extractor = DictionaryExtractor() \
+    .set_pre_filter(lambda x: name_filter_regex.match(x)) \
+    .set_pre_process(lambda x: x.lower()) \
+    .set_metadata({
+    'extractor': 'dig_name_dictionary_extractor',
+    'semantic_type': 'name',
+    'input_type': ['tokens'],
+    'type': 'dictionary',  # !Important
+    'properties_key': 'names_high_precision',  # !Important
+}) \
+    .set_include_context(True)
+
 data_extractors = [
             phone_extractor_init,
             age_extracor_init,
@@ -257,7 +269,8 @@ data_extractors = [
             reviewid_extractor,
             price_extractor,
             socialmedia_id_extractor,
-            address_extractor
+            address_extractor,
+            names_dictionary_extractor
         ]
 inferlink_type_to_extractor_map = {
     'name': [name_regex_extractor_init],
