@@ -356,7 +356,7 @@ def consolidate_semantic_types(doc, normalize_conf, N):
                                                                                                      description,
                                                                                                      'relaxed',
                                                                                                      normalize_conf, N)
-
+    doc.pop('html', None)
     doc[FIELDS] = semantic_type_objs
     return doc
 

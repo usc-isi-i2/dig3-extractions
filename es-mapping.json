@@ -2,12 +2,2341 @@
   "mappings": {
     "ads": {
       "properties": {
+        "content_type": {
+          "type": "string"
+        },
+        "crawl_data": {
+          "type": "string"
+        },
+        "crawler": {
+          "type": "string"
+        },
         "doc_id": {
           "type": "string",
           "index": "not_analyzed"
         },
+        "extracted_metadata": {
+          "type": "string"
+        },
+        "extracted_text": {
+          "type": "string"
+        },
+        "extractions": {
+          "properties": {
+            "age": {
+              "properties": {
+                "attribs": {
+                  "properties": {
+                    "class": {
+                      "type": "string"
+                    },
+                    "target": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "website": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "results": {
+                  "type": "string"
+                }
+              }
+            },
+            "city": {
+              "properties": {
+                "attribs": {
+                  "properties": {
+                    "class": {
+                      "type": "string"
+                    },
+                    "target": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "website": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "results": {
+                  "type": "string"
+                }
+              }
+            },
+            "gender": {
+              "properties": {
+                "attribs": {
+                  "properties": {
+                    "class": {
+                      "type": "string"
+                    },
+                    "target": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "website": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "results": {
+                  "type": "string"
+                }
+              }
+            },
+            "latitude": {
+              "properties": {
+                "attribs": {
+                  "properties": {
+                    "class": {
+                      "type": "string"
+                    },
+                    "target": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "website": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "results": {
+                  "type": "string"
+                }
+              }
+            },
+            "longitude": {
+              "properties": {
+                "attribs": {
+                  "properties": {
+                    "class": {
+                      "type": "string"
+                    },
+                    "target": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "website": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "results": {
+                  "type": "string"
+                }
+              }
+            },
+            "otherads": {
+              "properties": {
+                "attribs": {
+                  "properties": {
+                    "class": {
+                      "type": "string"
+                    },
+                    "target": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "website": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "results": {
+                  "type": "string"
+                }
+              }
+            },
+            "phone": {
+              "properties": {
+                "attribs": {
+                  "properties": {
+                    "class": {
+                      "type": "string"
+                    },
+                    "target": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "website": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "results": {
+                  "type": "string"
+                }
+              }
+            },
+            "posttime": {
+              "properties": {
+                "attribs": {
+                  "properties": {
+                    "class": {
+                      "type": "string"
+                    },
+                    "target": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "website": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "results": {
+                  "type": "string"
+                }
+              }
+            },
+            "region": {
+              "properties": {
+                "attribs": {
+                  "properties": {
+                    "class": {
+                      "type": "string"
+                    },
+                    "target": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "website": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "results": {
+                  "type": "string"
+                }
+              }
+            },
+            "reviewsite1": {
+              "properties": {
+                "attribs": {
+                  "properties": {
+                    "class": {
+                      "type": "string"
+                    },
+                    "target": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "website": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "results": {
+                  "type": "string"
+                }
+              }
+            },
+            "sid": {
+              "properties": {
+                "attribs": {
+                  "properties": {
+                    "class": {
+                      "type": "string"
+                    },
+                    "target": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "website": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "results": {
+                  "type": "string"
+                }
+              }
+            },
+            "state": {
+              "properties": {
+                "attribs": {
+                  "properties": {
+                    "class": {
+                      "type": "string"
+                    },
+                    "target": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "website": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "results": {
+                  "type": "string"
+                }
+              }
+            },
+            "text": {
+              "properties": {
+                "attribs": {
+                  "properties": {
+                    "class": {
+                      "type": "string"
+                    },
+                    "target": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "website": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "results": {
+                  "type": "string"
+                }
+              }
+            },
+            "title": {
+              "properties": {
+                "attribs": {
+                  "properties": {
+                    "class": {
+                      "type": "string"
+                    },
+                    "target": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "website": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "results": {
+                  "type": "string"
+                }
+              }
+            },
+            "userlocation": {
+              "properties": {
+                "attribs": {
+                  "properties": {
+                    "class": {
+                      "type": "string"
+                    },
+                    "target": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "website": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "results": {
+                  "type": "string"
+                }
+              }
+            },
+            "username": {
+              "properties": {
+                "attribs": {
+                  "properties": {
+                    "class": {
+                      "type": "string"
+                    },
+                    "target": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "website": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "results": {
+                  "type": "string"
+                }
+              }
+            },
+            "website": {
+              "properties": {
+                "attribs": {
+                  "properties": {
+                    "class": {
+                      "type": "string"
+                    },
+                    "target": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "website": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "results": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "extractors": {
+          "properties": {
+            "content_relaxed": {
+              "properties": {
+                "crf_tokens": {
+                  "properties": {
+                    "semantic_type": {
+                      "properties": {
+                        "city": {
+                          "type": "string"
+                        },
+                        "country": {
+                          "type": "string"
+                        },
+                        "geoname_id": {
+                          "type": "long"
+                        },
+                        "latitude": {
+                          "type": "double"
+                        },
+                        "length": {
+                          "type": "long"
+                        },
+                        "longitude": {
+                          "type": "double"
+                        },
+                        "offset": {
+                          "type": "long"
+                        },
+                        "probability": {
+                          "type": "double"
+                        },
+                        "read": {
+                          "type": "boolean"
+                        },
+                        "selected": {
+                          "type": "long"
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "data_extractors": {
+                  "properties": {
+                    "address": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "age": {
+                      "properties": {
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "city": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "properties_key": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "ethnicity": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "properties_key": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "eye_color": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "properties_key": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "hair_color": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "properties_key": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "height": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "height": {
+                              "properties": {
+                                "centimeter": {
+                                  "type": "long"
+                                },
+                                "foot": {
+                                  "type": "string"
+                                },
+                                "raw": {
+                                  "properties": {
+                                    "centimeter": {
+                                      "type": "long"
+                                    },
+                                    "foot": {
+                                      "type": "double"
+                                    },
+                                    "inch": {
+                                      "type": "long"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "name": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "properties_key": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "phone": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "price": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "price": {
+                              "properties": {
+                                "price": {
+                                  "type": "string"
+                                },
+                                "price_unit": {
+                                  "type": "string"
+                                },
+                                "time_unit": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "price_per_hour": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "review_id": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "identifier": {
+                              "type": "string"
+                            },
+                            "site": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "service": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "social_media_id": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "twitter": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "state": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "properties_key": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "weight": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "weight": {
+                              "properties": {
+                                "kilogram": {
+                                  "type": "long"
+                                },
+                                "pound": {
+                                  "type": "long"
+                                },
+                                "raw": {
+                                  "properties": {
+                                    "kilogram": {
+                                      "type": "long"
+                                    },
+                                    "pound": {
+                                      "type": "long"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "text": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "tokens": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "content_strict": {
+              "properties": {
+                "crf_tokens": {
+                  "properties": {
+                    "semantic_type": {
+                      "properties": {
+                        "city": {
+                          "type": "string"
+                        },
+                        "country": {
+                          "type": "string"
+                        },
+                        "geoname_id": {
+                          "type": "long"
+                        },
+                        "latitude": {
+                          "type": "double"
+                        },
+                        "length": {
+                          "type": "long"
+                        },
+                        "longitude": {
+                          "type": "double"
+                        },
+                        "offset": {
+                          "type": "long"
+                        },
+                        "probability": {
+                          "type": "double"
+                        },
+                        "read": {
+                          "type": "boolean"
+                        },
+                        "selected": {
+                          "type": "long"
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "data_extractors": {
+                  "properties": {
+                    "address": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "age": {
+                      "properties": {
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "city": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "properties_key": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "ethnicity": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "properties_key": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "eye_color": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "properties_key": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "hair_color": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "properties_key": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "height": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "height": {
+                              "properties": {
+                                "centimeter": {
+                                  "type": "long"
+                                },
+                                "foot": {
+                                  "type": "string"
+                                },
+                                "raw": {
+                                  "properties": {
+                                    "centimeter": {
+                                      "type": "long"
+                                    },
+                                    "foot": {
+                                      "type": "double"
+                                    },
+                                    "inch": {
+                                      "type": "long"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "name": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "properties_key": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "phone": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "price": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "price": {
+                              "properties": {
+                                "price": {
+                                  "type": "string"
+                                },
+                                "price_unit": {
+                                  "type": "string"
+                                },
+                                "time_unit": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "price_per_hour": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "review_id": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "identifier": {
+                              "type": "string"
+                            },
+                            "site": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "service": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "social_media_id": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "twitter": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "state": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "properties_key": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "weight": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "weight": {
+                              "properties": {
+                                "kilogram": {
+                                  "type": "long"
+                                },
+                                "pound": {
+                                  "type": "long"
+                                },
+                                "raw": {
+                                  "properties": {
+                                    "kilogram": {
+                                      "type": "long"
+                                    },
+                                    "pound": {
+                                      "type": "long"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "text": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "tokens": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "title": {
+              "properties": {
+                "crf_tokens": {
+                  "properties": {
+                    "semantic_type": {
+                      "properties": {
+                        "city": {
+                          "type": "string"
+                        },
+                        "country": {
+                          "type": "string"
+                        },
+                        "geoname_id": {
+                          "type": "long"
+                        },
+                        "latitude": {
+                          "type": "double"
+                        },
+                        "length": {
+                          "type": "long"
+                        },
+                        "longitude": {
+                          "type": "double"
+                        },
+                        "offset": {
+                          "type": "long"
+                        },
+                        "probability": {
+                          "type": "double"
+                        },
+                        "selected": {
+                          "type": "long"
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "data_extractors": {
+                  "properties": {
+                    "address": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "age": {
+                      "properties": {
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "city": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "properties_key": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "ethnicity": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "properties_key": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "eye_color": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "properties_key": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "hair_color": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "properties_key": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "height": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "height": {
+                              "properties": {
+                                "centimeter": {
+                                  "type": "long"
+                                },
+                                "foot": {
+                                  "type": "string"
+                                },
+                                "raw": {
+                                  "properties": {
+                                    "centimeter": {
+                                      "type": "long"
+                                    },
+                                    "foot": {
+                                      "type": "long"
+                                    },
+                                    "inch": {
+                                      "type": "long"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "name": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "properties_key": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "phone": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "price": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "price": {
+                              "properties": {
+                                "price": {
+                                  "type": "string"
+                                },
+                                "price_unit": {
+                                  "type": "string"
+                                },
+                                "time_unit": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "price_per_hour": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "service": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "state": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "properties_key": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "text": {
+                  "properties": {
+                    "extractor": {
+                      "type": "string"
+                    },
+                    "input_type": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "properties": {
+                        "context": {
+                          "properties": {
+                            "end": {
+                              "type": "long"
+                            },
+                            "field": {
+                              "type": "string"
+                            },
+                            "start": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "tokens": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "fields": {
           "properties": {
+            "address": {
+              "properties": {
+                "relaxed": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "strict": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
             "age": {
               "properties": {
                 "relaxed": {
@@ -180,7 +2509,7 @@
                 }
               }
             },
-            "hair_color": {
+            "gender": {
               "properties": {
                 "strict": {
                   "properties": {
@@ -192,8 +2521,23 @@
                       "type": "string"
                     }
                   }
-                },
+                }
+              }
+            },
+            "hair_color": {
+              "properties": {
                 "relaxed": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "strict": {
                   "properties": {
                     "key": {
                       "type": "string",
@@ -232,6 +2576,24 @@
                       "type": "string"
                     },
                     "search": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "location": {
+              "properties": {
+                "relaxed": {
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "strict": {
+                  "properties": {
+                    "name": {
                       "type": "string"
                     }
                   }
@@ -292,7 +2654,7 @@
             },
             "posting_date": {
               "properties": {
-                "strict": {
+                "relaxed": {
                   "properties": {
                     "key": {
                       "type": "date",
@@ -304,7 +2666,7 @@
                     }
                   }
                 },
-                "relaxed": {
+                "strict": {
                   "properties": {
                     "key": {
                       "type": "date",
@@ -319,6 +2681,84 @@
               }
             },
             "price": {
+              "properties": {
+                "relaxed": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "strict": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "review_id": {
+              "properties": {
+                "relaxed": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "strict": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "service": {
+              "properties": {
+                "relaxed": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "strict": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "index": "not_analyzed"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "social_media_id": {
               "properties": {
                 "relaxed": {
                   "properties": {
@@ -372,6 +2812,13 @@
             },
             "title": {
               "properties": {
+                "relaxed": {
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                },
                 "strict": {
                   "properties": {
                     "name": {
@@ -415,6 +2862,1047 @@
             }
           }
         },
+        "html": {
+          "type": "string"
+        },
+        "landmark": {
+          "properties": {
+            "inferlink_age": {
+              "properties": {
+                "crf_tokens": {
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "text": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "tokens": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "inferlink_city": {
+              "properties": {
+                "crf_tokens": {
+                  "properties": {
+                    "semantic_type": {
+                      "properties": {
+                        "city": {
+                          "type": "string"
+                        },
+                        "country": {
+                          "type": "string"
+                        },
+                        "geoname_id": {
+                          "type": "long"
+                        },
+                        "latitude": {
+                          "type": "double"
+                        },
+                        "length": {
+                          "type": "long"
+                        },
+                        "longitude": {
+                          "type": "double"
+                        },
+                        "offset": {
+                          "type": "long"
+                        },
+                        "probability": {
+                          "type": "double"
+                        },
+                        "read": {
+                          "type": "boolean"
+                        },
+                        "selected": {
+                          "type": "long"
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "data_extractors": {
+                  "properties": {
+                    "city": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "properties_key": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "text": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "tokens": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "inferlink_description": {
+              "properties": {
+                "crf_tokens": {
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "text": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "tokens": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "inferlink_ethnicity": {
+              "properties": {
+                "crf_tokens": {
+                  "properties": {
+                    "semantic_type": {
+                      "properties": {
+                        "length": {
+                          "type": "long"
+                        },
+                        "offset": {
+                          "type": "long"
+                        },
+                        "probability": {
+                          "type": "double"
+                        },
+                        "read": {
+                          "type": "boolean"
+                        },
+                        "selected": {
+                          "type": "long"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "data_extractors": {
+                  "properties": {
+                    "ethnicity": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "properties_key": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "text": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "tokens": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "inferlink_gender": {
+              "properties": {
+                "crf_tokens": {
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "text": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "tokens": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "inferlink_junk": {
+              "properties": {
+                "crf_tokens": {
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "text": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "tokens": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "inferlink_location": {
+              "properties": {
+                "crf_tokens": {
+                  "properties": {
+                    "semantic_type": {
+                      "properties": {
+                        "city": {
+                          "type": "string"
+                        },
+                        "country": {
+                          "type": "string"
+                        },
+                        "geoname_id": {
+                          "type": "long"
+                        },
+                        "latitude": {
+                          "type": "double"
+                        },
+                        "length": {
+                          "type": "long"
+                        },
+                        "longitude": {
+                          "type": "double"
+                        },
+                        "offset": {
+                          "type": "long"
+                        },
+                        "probability": {
+                          "type": "double"
+                        },
+                        "read": {
+                          "type": "boolean"
+                        },
+                        "selected": {
+                          "type": "long"
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "data_extractors": {
+                  "properties": {
+                    "city": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "properties_key": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "text": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "tokens": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "inferlink_name": {
+              "properties": {
+                "crf_tokens": {
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "text": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "tokens": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "inferlink_phone": {
+              "properties": {
+                "crf_tokens": {
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "data_extractors": {
+                  "properties": {
+                    "phone": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "text": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "tokens": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "inferlink_posting-date": {
+              "properties": {
+                "crf_tokens": {
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "text": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "tokens": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "inferlink_price": {
+              "properties": {
+                "crf_tokens": {
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "text": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "tokens": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "inferlink_review-id": {
+              "properties": {
+                "crf_tokens": {
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "text": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "tokens": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "inferlink_service": {
+              "properties": {
+                "crf_tokens": {
+                  "properties": {
+                    "semantic_type": {
+                      "properties": {
+                        "length": {
+                          "type": "long"
+                        },
+                        "offset": {
+                          "type": "long"
+                        },
+                        "read": {
+                          "type": "boolean"
+                        },
+                        "selected": {
+                          "type": "long"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "data_extractors": {
+                  "properties": {
+                    "service": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "text": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "tokens": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "inferlink_state": {
+              "properties": {
+                "crf_tokens": {
+                  "properties": {
+                    "semantic_type": {
+                      "properties": {
+                        "country": {
+                          "type": "string"
+                        },
+                        "length": {
+                          "type": "long"
+                        },
+                        "offset": {
+                          "type": "long"
+                        },
+                        "read": {
+                          "type": "boolean"
+                        },
+                        "selected": {
+                          "type": "long"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "data_extractors": {
+                  "properties": {
+                    "state": {
+                      "properties": {
+                        "extractor": {
+                          "type": "string"
+                        },
+                        "input_type": {
+                          "type": "string"
+                        },
+                        "properties_key": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "properties": {
+                            "context": {
+                              "properties": {
+                                "end": {
+                                  "type": "long"
+                                },
+                                "field": {
+                                  "type": "string"
+                                },
+                                "start": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "semantic_type": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "text": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "tokens": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "inferlink_title": {
+              "properties": {
+                "crf_tokens": {
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "text": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "tokens": {
+                  "properties": {
+                    "result": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "raw_content": {
+          "type": "string"
+        },
+        "team": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "date",
+          "format": "strict_date_optional_time||epoch_millis"
+        },
         "tld": {
           "type": "string",
           "index": "not_analyzed"
@@ -423,22 +3911,14 @@
           "type": "string",
           "fields": {
             "raw": {
-              "index": "not_analyzed",
-              "type": "string"
+              "type": "string",
+              "index": "not_analyzed"
             }
           }
+        },
+        "version": {
+          "type": "string"
         }
-      }
-    }
-  },
-  "settings": {
-    "index": {
-      "creation_date": "1486591332105",
-      "number_of_shards": "10",
-      "number_of_replicas": "0",
-      "uuid": "d10DIkVkTpSKpGhxzxQzqg",
-      "version": {
-        "created": "2040199"
       }
     }
   }
