@@ -43,6 +43,7 @@ if __name__ == "__main__":
 
     parser = OptionParser()
     parser.add_option("-l", "--landmarkRules", action="store", type="string", dest="landmarkRules")
+    parser.add_option("-f", "--frenchEnglishWords", action="store", type="string", dest="frenchEnglishWords")
     (c_options, args) = parser.parse_args()
 
     try:
@@ -52,6 +53,11 @@ if __name__ == "__main__":
     except Exception as e:
         print "Usage error: python run.py <input> <output> <properties>"
         sys.exit()
+
+    french_english_words_file = c_options.frenchEnglishWords
+    french_english_words = None
+    if french_english_words_file:
+        french_english_words = json.load(codecs.open(french_english_words_file, 'r'))
 
     landmark_rules_file = c_options.landmarkRules
     landmark_rules = None
@@ -67,7 +73,7 @@ if __name__ == "__main__":
     properties = load_json_file(properties_file)
 
     # Initialize only requires extractors
-    pe = ProcessExtractor(content_extractors, data_extractors, properties, landmark_rules=landmark_rules)
+    pe = ProcessExtractor(content_extractors, data_extractors, properties, landmark_rules=landmark_rules, french_english_words=french_english_words)
 
     # Initialize the classifiers
     classifier_processor = ProcessClassifier(extraction_classifiers)

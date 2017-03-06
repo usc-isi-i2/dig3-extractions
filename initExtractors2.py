@@ -226,13 +226,6 @@ price_extractor = PriceExtractor().set_metadata({
         'input_type': ['text']
 })
 
-french_english_words = json.load(codecs.open('french_english_words.json', 'r'))
-socialmedia_id_extractor = SocialMediaIdExtractor(french_english_words['english'],
-                                                  french_english_words['french']).set_metadata({
-                                                        'extractor': 'dig_social_media_extractor',
-                                                        'semantic_type': 'social_media_id',
-                                                        'input_type': ['tokens']
-                                                })
 
 address_extractor = AddressExtractor() \
             .set_include_context(True) \
@@ -268,7 +261,6 @@ data_extractors = [
             service_extractor,
             reviewid_extractor,
             price_extractor,
-            socialmedia_id_extractor,
             address_extractor,
             names_dictionary_extractor
         ]
@@ -400,7 +392,7 @@ content_extractors = {
 
 class ProcessExtractor(Extractor):
     """ Class to process the document - Extend functions from Extractor class """
-    def __init__(self, content_extractors, data_extractors, properties=None, landmark_rules=None):
+    def __init__(self, content_extractors, data_extractors, properties=None, landmark_rules=None, french_english_words=None):
         self.landmark_rules = landmark_rules
         self.landmark = None
         if self.landmark_rules:
@@ -421,6 +413,15 @@ class ProcessExtractor(Extractor):
                 self.landmark = landmark_extractor_init
         self.content_extractors = self.__initialize(content_extractors)
         self.data_extractors = self.__get_data_extractor(data_extractors, properties)
+
+        if french_english_words:
+            socialmedia_id_extractor = SocialMediaIdExtractor(french_english_words['english'],
+                                                              french_english_words['french']).set_metadata({
+                                                                        'extractor': 'dig_social_media_extractor',
+                                                                        'semantic_type': 'social_media_id',
+                                                                        'input_type': ['tokens']
+                                                                    })
+            self.data_extractors.append(socialmedia_id_extractor)
 
     def __initialize(self, extractors_selection, type_filter=None):
         """ Initialize content extractors """
