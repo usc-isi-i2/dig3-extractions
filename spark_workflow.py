@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+from pyspark import SparkContext
 import json
 import codecs
 import sys
@@ -7,9 +7,8 @@ import time
 import fnmatch
 from optparse import OptionParser
 from initExtractors2 import ProcessExtractor
-from initClassifiers import ProcessClassifier
-from initILP import ProcessILP
-
+# from initClassifiers import ProcessClassifier
+# from initILP import ProcessILP
 
 def load_json_file(file_name):
     rules = json.load(codecs.open(file_name, 'r', 'utf-8'))
@@ -33,13 +32,14 @@ def jl_path_iterator(file_path):
     else:
         yield abs_file_path
 
-#
-# todo force flag to check path exists or not
-
 if __name__ == "__main__":
+    compression = "org.apache.hadoop.io.compress.GzipCodec"
+    sc = SparkContext(appName="Memex Eval 2017 Workflow")
+
     parser = OptionParser()
     parser.add_option("-l", "--landmarkRules", action="store", type="string", dest="landmarkRules")
     parser.add_option("-f", "--frenchEnglishWords", action="store", type="string", dest="frenchEnglishWords")
+    parser.add_option("-p", "--numPartitions", dest="numPartitions", type="int", default=1000)
     (c_options, args) = parser.parse_args()
 
     try:
@@ -69,48 +69,22 @@ if __name__ == "__main__":
     properties = load_json_file(properties_file)
 
     # Initialize only requires extractors
-    pe = ProcessExtractor(content_extractors, data_extractors, properties, landmark_rules=landmark_rules, french_english_words=french_english_words)
+    pe = ProcessExtractor(content_extractors, data_extractors, properties, landmark_rules=landmark_rules,
+                          french_english_words=french_english_words)
 
-    # Initialize the classifiers
-    classifier_processor = ProcessClassifier(extraction_classifiers)
+    # # Initialize the classifiers
+    # classifier_processor = ProcessClassifier(extraction_classifiers)
+    #
+    # # Initialize the ILP engine
+    # ilp_processor = ProcessILP(properties)
+    input_rdd = sc.sequenceFile(input_path).mapValues(json.loads)
+    processed_rdd = input_rdd.mapValues(lambda x: pe.buildTreeFromHtml(x, {'raw_content': x['raw_content']}, levelKey='extractors', jsonPath=False)).mapValues(pe.process_inferlink_fields)
 
-    # Initialize the ILP engine
-    ilp_processor = ProcessILP(properties)
-
-    o = codecs.open(output_file, 'w', 'utf-8')
-    i = 1
-    for jl in jl_file_iterator(input_path):
-        print '*' * 20, "Processing file, ", i, '*' * 20
-        start_time = time.time()
-        print "Building and running content extractors..."
-
-        result_doc = ''
-        # step 1
-        tree_inputs = {'raw_content': jl['raw_content']}
-        result_doc = pe.buildTreeFromHtml(jl, tree_inputs, levelKey='extractors', jsonPath=False)
-        time_taken = time.time() - start_time
-        print "Total time for content(Readability + table): ", time_taken
-
-        result_doc = pe.process_inferlink_fields(result_doc)
-
-        start_time_mid = time.time()
-        result_doc = pe.buildTokensAndDataExtractors(result_doc)
-        time_taken = time.time() - start_time_mid
-        print "Total time for tokenizing, data extractors and annotation: ", time_taken
-
-        # Classifying the extractions using their context and appending the probabilities
-        print "Classifying the extractions..."
-        result_doc = classifier_processor.classify_extractions(result_doc)
-        #
-        # # Formulating and Solving the ILP for the extractions
-        print "Formulating and Solving the ILP"
-        result_doc = ilp_processor.run_ilp(result_doc)
-
-        time_taken = time.time() - start_time
-        print "Total Time: ", time_taken
-        print "Done.."
-        print '*' * 20, " End ", '*' * 20
-        o.write(json.dumps(result_doc) + '\n')
-
-        i += 1
-    o.close()
+    processed_rdd.mapValues(pe.buildTokensAndDataExtractors).mapValues(json.dumps).saveAsSequenceFile(output_file, compressionCodecClass=compression)
+    # # Classifying the extractions using their context and appending the probabilities
+    # print "Classifying the extractions..."
+    # result_doc = classifier_processor.classify_extractions(result_doc)
+    # #
+    # # # Formulating and Solving the ILP for the extractions
+    # print "Formulating and Solving the ILP"
+    # result_doc = ilp_processor.run_ilp(result_doc
