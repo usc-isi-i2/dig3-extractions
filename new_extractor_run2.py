@@ -64,7 +64,7 @@ if __name__ == "__main__":
     # Init the extractors
     content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL', 'TABLE', 'TITLE']
     data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color', 'eye_color', 'name', 'landmark', 'height',
-                       'weight', 'state', 'service', 'review_id', 'price', 'social_media_id', 'address']
+                       'weight', 'state', 'service', 'review_id', 'price', 'social_media_id', 'address', 'email']
     extraction_classifiers = ['city', 'ethnicity', 'hair_color', 'name', 'eye_color']
     properties = load_json_file(properties_file)
 

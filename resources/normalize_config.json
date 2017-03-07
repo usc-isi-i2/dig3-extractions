@@ -94,5 +94,9 @@
   "address": {
     "data_type": "basestring",
     "function": "identity_with_key"
+  },
+  "email": {
+    "data_type": "basestring",
+    "function": "clean_email"
   }
   }

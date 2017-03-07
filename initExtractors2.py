@@ -34,6 +34,7 @@ from digReviewIDExtractor.review_id_extractor import ReviewIDExtractor
 from digPriceExtractor.price_extractor import PriceExtractor
 from digSocialMediaIdExtractor.socialmedia_id_extractor import SocialMediaIdExtractor
 from digAddressExtractor.address_extractor import AddressExtractor
+from digEmailExtractor.email_extractor import EmailExtractor
 
 """This is just for reference
 inferlink_field_names = [
@@ -235,6 +236,15 @@ address_extractor = AddressExtractor() \
                 'input_type': ['text']
         })
 
+email_extractor = EmailExtractor() \
+    .set_include_context(True) \
+    .set_metadata({
+                'extractor': 'dig_email_regex_extractor',
+                'semantic_type': 'email',
+                'input_type': ['text']
+        })
+
+
 names_dictionary_extractor = DictionaryExtractor() \
     .set_pre_filter(lambda x: name_filter_regex.match(x)) \
     .set_pre_process(lambda x: x.lower()) \
@@ -262,7 +272,8 @@ data_extractors = [
             reviewid_extractor,
             price_extractor,
             address_extractor,
-            names_dictionary_extractor
+            names_dictionary_extractor,
+            email_extractor
         ]
 inferlink_type_to_extractor_map = {
     'name': [name_regex_extractor_init],

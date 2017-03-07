@@ -397,7 +397,7 @@ class N(object):
                 out = dict()
                 out['name'] = pph + ' $ per hour'
                 v = N.sanity_check_values(pph, conf)
-                if v:
+                if v and v.endswith('0'):
                     out['key'] = v + ' $ per hour'
                 o_list.append(out)
         if 'price' in x:
@@ -407,7 +407,7 @@ class N(object):
                         out = dict()
                         out['name'] = p['price'] + ' ' + p['price_unit'] + ' per ' + p['time_unit']
                         v = N.sanity_check_values(p['price'], conf)
-                        if v:
+                        if v and v.endswith('0'):
                             out['key'] = v + ' ' + p['price_unit'] + ' per ' + p['time_unit']
                         o_list.append(out)
         return o_list
@@ -434,4 +434,11 @@ class N(object):
                 o['key'] = key + ' ' + smids[key]
                 o_list.append(o)
         return o_list
+
+    @staticmethod
+    def clean_email(x, conf=None):
+        out = dict()
+        out['key'] = x['value']
+        out['name'] = x['value']
+        return out
 
