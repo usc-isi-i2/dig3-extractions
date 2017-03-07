@@ -7,8 +7,8 @@ import time
 import fnmatch
 from optparse import OptionParser
 from initExtractors2 import ProcessExtractor
-from initClassifiers import ProcessClassifier
-from initILP import ProcessILP
+# from initClassifiers import ProcessClassifier
+# from initILP import ProcessILP
 from hadoop.io import SequenceFile
 
 
@@ -73,10 +73,10 @@ if __name__ == "__main__":
     pe = ProcessExtractor(content_extractors, data_extractors, properties, landmark_rules=landmark_rules, french_english_words=french_english_words)
 
     # Initialize the classifiers
-    classifier_processor = ProcessClassifier(extraction_classifiers)
+    # classifier_processor = ProcessClassifier(extraction_classifiers)
 
     # Initialize the ILP engine
-    ilp_processor = ProcessILP(properties)
+    # ilp_processor = ProcessILP(properties)
 
     o = codecs.open(output_file, 'w', 'utf-8')
     i = 1
@@ -111,12 +111,12 @@ if __name__ == "__main__":
         print "Total time for tokenizing, data extractors and annotation: ", time_taken
 
         # Classifying the extractions using their context and appending the probabilities
-        print "Classifying the extractions..."
-        result_doc = classifier_processor.classify_extractions(result_doc)
-        #
-        # # Formulating and Solving the ILP for the extractions
-        print "Formulating and Solving the ILP"
-        result_doc = ilp_processor.run_ilp(result_doc)
+        # print "Classifying the extractions..."
+        # result_doc = classifier_processor.classify_extractions(result_doc)
+        # #
+        # # # Formulating and Solving the ILP for the extractions
+        # print "Formulating and Solving the ILP"
+        # result_doc = ilp_processor.run_ilp(result_doc)
 
         time_taken = time.time() - start_time
         print "Total Time: ", time_taken
