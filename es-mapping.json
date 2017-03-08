@@ -2440,7 +2440,8 @@
                       "index": "not_analyzed"
                     },
                     "name": {
-                      "type": "string"
+                      "type": "string",
+                      "analyzer": "url_component_analyzer"
                     }
                   }
                 },
@@ -2451,7 +2452,8 @@
                       "index": "not_analyzed"
                     },
                     "name": {
-                      "type": "string"
+                      "type": "string",
+                      "analyzer": "url_component_analyzer"
                     }
                   }
                 }
@@ -3905,10 +3907,17 @@
         },
         "tld": {
           "type": "string",
-          "index": "not_analyzed"
+          "analyzer": "url_component_analyzer", 
+          "fields": {
+            "raw": {
+              "type": "string",
+              "index": "not_analyzed"
+            }
+          }
         },
         "url": {
           "type": "string",
+          "analyzer": "url_component_analyzer", 
           "fields": {
             "raw": {
               "type": "string",
@@ -3948,6 +3957,7 @@
         },
         "url": {
           "type": "string",
+          "analyzer": "url_component_analyzer",
           "fields": {
             "raw": {
               "type": "string",
@@ -3965,6 +3975,30 @@
       "uuid": "3lwnAPPDSGOXXUuYTbomZw",
       "version": {
         "created": "2040199"
+      }
+    },
+    "analysis":
+    {
+      "analyzer": {
+        "url_component_analyzer": {
+          "tokenizer": "url_component_tokenizer",
+          "filter": "url_component_filter"
+        },
+        "url_analyzer": {
+          "tokenizer": "uax_url_email"
+        }
+      },
+      "tokenizer": {
+        "url_component_tokenizer": {
+          "type": "pattern",
+          "pattern": "[^A-Za-z0-9]",
+          "flags": "CASE_INSENSITIVE|COMMENTS"
+        }
+      },
+      "filter": {
+        "url_component_filter":{
+          "type": "lowercase"
+        }
       }
     }
   }
