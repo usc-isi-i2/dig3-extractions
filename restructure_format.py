@@ -390,12 +390,13 @@ def add_giant_oak_risk(x, giant_oak_risk_assessment):
 
 if __name__ == "__main__":
     parser = OptionParser()
+    parser.add_option("-r", "--giantOakRisk", action="store", type="string", dest="giantOakRisk")
     (c_options, args) = parser.parse_args()
     input_file = args[0]
     output_file = args[1]
     normalize_conf_file = args[2]
     hybrid_jaccard_conf_file = args[3]
-    parser.add_option("-r", "--giantOakRisk", action="store", type="string", dest="giantOakRisk")
+
 
     giant_oak_risk_assessment = None
     giant_oak_file = c_options.giantOakRisk
