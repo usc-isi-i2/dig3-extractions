@@ -395,21 +395,21 @@ class N(object):
             pphs = x['price_per_hour']
             for pph in pphs:
                 out = dict()
+                out['name'] = pph + ' $ per hour'
                 v = N.sanity_check_values(pph, conf)
                 if v and v.endswith('0'):
                     out['key'] = v + ' $ per hour'
-                    out['name'] = v + ' $ per hour'
-                    o_list.append(out)
+                o_list.append(out)
         if 'price' in x:
             ps = x['price']
             for p in ps:
                 if N.check_if_add_price(p['price'], pphs):
                         out = dict()
+                        out['name'] = p['price'] + ' ' + p['price_unit'] + ' per ' + p['time_unit']
                         v = N.sanity_check_values(p['price'], conf)
                         if v and v.endswith('0'):
                             out['key'] = v + ' ' + p['price_unit'] + ' per ' + p['time_unit']
-                            out['name'] = v + ' ' + p['price_unit'] + ' per ' + p['time_unit']
-                            o_list.append(out)
+                        o_list.append(out)
         return o_list
 
     @staticmethod
