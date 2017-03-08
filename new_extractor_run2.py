@@ -17,7 +17,7 @@ def load_json_file(file_name):
 
 
 def jl_file_iterator(file):
-    with codecs.open(file, 'r', 'utf-8') as f:
+    with codecs.open(file, 'r') as f:
         for line in f:
             document = json.loads(line)
             yield document
@@ -40,6 +40,7 @@ if __name__ == "__main__":
     parser = OptionParser()
     parser.add_option("-l", "--landmarkRules", action="store", type="string", dest="landmarkRules")
     parser.add_option("-f", "--frenchEnglishWords", action="store", type="string", dest="frenchEnglishWords")
+    parser.add_option("-n", "--startingLineNumber", action="store", type="int", dest="startingLineNumber")
     (c_options, args) = parser.parse_args()
 
     try:
@@ -61,6 +62,8 @@ if __name__ == "__main__":
         landmark_rules = json.load(codecs.open(landmark_rules_file, 'r', 'utf-8'))
         # print landmark_rules['eroticmugshots.com']
 
+    starting_line = c_options.startingLineNumber
+
     # Init the extractors
     content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL', 'TABLE', 'TITLE']
     data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color', 'eye_color', 'name', 'landmark', 'height',
@@ -77,9 +80,12 @@ if __name__ == "__main__":
     # Initialize the ILP engine
     ilp_processor = ProcessILP(properties)
 
-    o = codecs.open(output_file, 'w', 'utf-8')
+    o = codecs.open(output_file, 'a')
     i = 1
     for jl in jl_file_iterator(input_path):
+        if starting_line and i < starting_line:
+            i += 1
+            pass
         print '*' * 20, "Processing file, ", i, '*' * 20
         start_time = time.time()
         print "Building and running content extractors..."
