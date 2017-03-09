@@ -94,8 +94,8 @@ def create_field_object(obj_dedup_semantic_types, value_type, value, field_name,
 
     out = dict()
     debug = False
-    if field_name == 'email':
-        debug = True
+    if field_name == 'price':
+        debug = False
     if debug:
         print "Input value %s" % (value)
     if field_name in normalize_conf:
@@ -106,24 +106,23 @@ def create_field_object(obj_dedup_semantic_types, value_type, value, field_name,
         end_time = time.time() - start_time
         if end_time > .05:
             print "Time taken to normalize %s : %f" % (value['value'], end_time)
-        if o:
-            if debug:
-                print "Output 1 %s" % (o)
-            return check_if_value_exists(o, obj_dedup_semantic_types, field_name, value_type)
-        else:
-            out['name'] = value['value']
-            if debug:
-                print "Output 2 %s" % (out)
-            return out, obj_dedup_semantic_types
 
-    out['key'] = value['value']
-    out['name'] = value['value']
-    if debug:
-        print "Output 3 %s" % (out)
-    return out, obj_dedup_semantic_types
+        if debug:
+            print "Output 1 %s" % (o)
+        return check_if_value_exists(o, obj_dedup_semantic_types, field_name, value_type)
+    print 'Make sure there is Normalize function for semantic type %s' % (field_name)
+    raise
+
+    # out['key'] = value['value']
+    # out['name'] = value['value']
+    # if debug:
+    #     print "Output 3 %s" % (out)
+    # return out, obj_dedup_semantic_types
 
 
 def check_if_value_exists(obj, dedup_list, field_name, value_type):
+    if not obj:
+        return obj, dedup_list
     out_list = list()
     if isinstance(obj, dict):
         obj = [obj]
@@ -360,17 +359,53 @@ def consolidate_semantic_types(doc, normalize_conf, N):
     doc[FIELDS] = semantic_type_objs
     return doc
 
+def create_list_objs(obj_list):
+    out = list()
+    for o in obj_list:
+        out.append(o['key'])
+    return out
+
+
+def add_giant_oak_risk(x, giant_oak_risk_assessment):
+    doc_id = x['doc_id']
+    if doc_id in giant_oak_risk_assessment:
+        risk = giant_oak_risk_assessment[doc_id]
+        print "adding risk %s for doc %s" % (risk, doc_id)
+        if 'fields' not in x:
+            x['fields'] = dict()
+        fields = x['fields']
+        if 'risk' not in fields:
+            fields['risk'] = dict()
+
+        if 'strict' not in fields['risk']:
+            fields['risk']['strict'] = list()
+        if risk not in create_list_objs(fields['risk']['strict']):
+            o = dict()
+            o['key'] = risk
+            o['name'] = risk
+            fields['risk']['strict'].append(o)
+        x['fields'] = fields
+    return x
+
 
 if __name__ == "__main__":
     parser = OptionParser()
+    parser.add_option("-r", "--giantOakRisk", action="store", type="string", dest="giantOakRisk")
     (c_options, args) = parser.parse_args()
     input_file = args[0]
     output_file = args[1]
     normalize_conf_file = args[2]
     hybrid_jaccard_conf_file = args[3]
+
+
+    giant_oak_risk_assessment = None
+    giant_oak_file = c_options.giantOakRisk
+    if giant_oak_file:
+        giant_oak_risk_assessment = json.load(codecs.open(giant_oak_file, 'r'))
+
     hybrid_jaccard_config = json.load(codecs.open(hybrid_jaccard_conf_file, 'r'))
     # print hybrid_jaccard_config
-    N_O = NO(hybrid_jaccard_config)
+    N_O = NO(hybrid_jaccard_config=hybrid_jaccard_config)
     normalize_conf = json.load(codecs.open(normalize_conf_file, 'r', 'utf-8'))
 
     lines = codecs.open(input_file, 'r').readlines()
@@ -380,7 +415,10 @@ if __name__ == "__main__":
         x = json.loads(line)
         s_t = time.time()
         print 'processing line # %d' % (i)
-        o.write(json.dumps(consolidate_semantic_types(x, normalize_conf, N_O)))
+        result = consolidate_semantic_types(x, normalize_conf, N_O)
+        if giant_oak_risk_assessment:
+            result = add_giant_oak_risk(result, giant_oak_risk_assessment)
+        o.write(json.dumps(result))
         e_t = time.time() - s_t
         if e_t > 1.0:
             print "Time taken to normalize %s : %f" % (json.loads(line)['doc_id'], e_t)

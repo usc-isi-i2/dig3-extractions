@@ -79,8 +79,8 @@ if __name__ == "__main__":
     # ilp_processor = ProcessILP(properties)
     input_rdd = sc.sequenceFile(input_path).mapValues(json.loads)
     processed_rdd = input_rdd.mapValues(lambda x: pe.buildTreeFromHtml(x, {'raw_content': x['raw_content']}, levelKey='extractors', jsonPath=False)).mapValues(pe.process_inferlink_fields)
-
-    processed_rdd.mapValues(pe.buildTokensAndDataExtractors).mapValues(json.dumps).saveAsSequenceFile(output_file, compressionCodecClass=compression)
+    print processed_rdd.first()
+    processed_rdd.mapValues(pe.buildTokensAndDataExtractors).mapValues(json.dumps).map(lambda x: x[1]).saveAsTextFile(output_file)
     # # Classifying the extractions using their context and appending the probabilities
     # print "Classifying the extractions..."
     # result_doc = classifier_processor.classify_extractions(result_doc)
