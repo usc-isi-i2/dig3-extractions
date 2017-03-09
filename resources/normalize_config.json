@@ -98,5 +98,9 @@
   "email": {
     "data_type": "basestring",
     "function": "clean_email"
+  },
+  "gender": {
+    "data_type": "basestring",
+    "function": "identity_with_key"
   }
   }

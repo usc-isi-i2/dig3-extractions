@@ -46,6 +46,7 @@ if __name__ == "__main__":
         input_path = args[0]
         output_file = args[1]
         properties_file = args[2]
+        phase = args[3]
     except Exception as e:
         print "Usage error: python run.py <input> <output> <properties>"
         sys.exit()
@@ -64,7 +65,8 @@ if __name__ == "__main__":
     # Init the extractors
     content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL', 'TABLE', 'TITLE']
     data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color', 'eye_color', 'name', 'landmark', 'height',
-                       'weight', 'state', 'service', 'review_id', 'price', 'social_media_id', 'address']
+                       'weight', 'state', 'service', 'review_id', 'price', 'social_media_id', 'address', 'email',
+                       'posting_date']
     extraction_classifiers = ['city', 'ethnicity', 'hair_color', 'name', 'eye_color']
     properties = load_json_file(properties_file)
 
@@ -78,9 +80,13 @@ if __name__ == "__main__":
     # # Initialize the ILP engine
     # ilp_processor = ProcessILP(properties)
     input_rdd = sc.sequenceFile(input_path).mapValues(json.loads)
-    processed_rdd = input_rdd.mapValues(lambda x: pe.buildTreeFromHtml(x, {'raw_content': x['raw_content']}, levelKey='extractors', jsonPath=False)).mapValues(pe.process_inferlink_fields)
-    print processed_rdd.first()
-    processed_rdd.mapValues(pe.buildTokensAndDataExtractors).mapValues(json.dumps).map(lambda x: x[1]).saveAsTextFile(output_file)
+    if phase == '1':
+        processed_rdd = input_rdd.mapValues(lambda x: pe.buildTreeFromHtml(x, {'raw_content': x['raw_content']}, levelKey='extractors', jsonPath=False)).mapValues(pe.process_inferlink_fields)
+    if phase == '2':
+        processed_rdd = input_rdd.mapValues(pe.process_ist_extractions).mapValues(pe.buildTokensAndDataExtractors)
+
+    processed_rdd.mapValues(json.dumps).saveAsSequenceFile(output_file, compressionCodecClass=compression)
+    #processed_rdd.mapValues(pe.buildTokensAndDataExtractors).mapValues(json.dumps).map(lambda x: x[1]).saveAsTextFile(output_file)
     # # Classifying the extractions using their context and appending the probabilities
     # print "Classifying the extractions..."
     # result_doc = classifier_processor.classify_extractions(result_doc)

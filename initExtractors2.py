@@ -35,6 +35,7 @@ from digPriceExtractor.price_extractor import PriceExtractor
 from digSocialMediaIdExtractor.socialmedia_id_extractor import SocialMediaIdExtractor
 from digAddressExtractor.address_extractor import AddressExtractor
 from digEmailExtractor.email_extractor import EmailExtractor
+from digPostingDateExtractor.posting_date_extractor import PostingDateExtractor
 
 """This is just for reference
 inferlink_field_names = [
@@ -106,6 +107,24 @@ inverse_inferlink_data_fields = {'inferlink_price': 'price',
                                  'inferlink_service' : 'service',
                                  'inferlink_review-id': 'review_id'
                                  }
+
+ist_data_fields = {
+    'age': ['age'],
+    'city': ['city', 'city2'],
+    'posting_date': ['posttime'],
+    'review_id': ['preferred411', 'ter', 'terid'],
+    'social_media_id': ['twitter']
+}
+
+inverse_ist_data_fields = {
+    'age': 'age',
+    'city': 'city',
+    'city2':'city',
+    'posttime': 'posting_date',
+    'preferred411': 'review_id',
+    'ter': 'review_id',
+    'terid': 'review_id'
+}
 
 
 fields_to_remove = ["crawl_data", "extracted_metadata"]
@@ -257,6 +276,12 @@ names_dictionary_extractor = DictionaryExtractor() \
 }) \
     .set_include_context(True)
 
+posting_date_extractor = PostingDateExtractor().set_metadata({
+    'extractor': 'dig_posting_date_extractor',
+    'semantic_type': 'posting_date',
+    'input_type': ['text']
+})
+
 data_extractors = [
             phone_extractor_init,
             age_extracor_init,
@@ -273,11 +298,12 @@ data_extractors = [
             price_extractor,
             address_extractor,
             names_dictionary_extractor,
-            email_extractor
+            email_extractor,
+            posting_date_extractor
         ]
 inferlink_type_to_extractor_map = {
     'name': [name_regex_extractor_init],
-    'posting_date': [],
+    'posting_date': [posting_date_extractor],
     'location': [city_dictionary_extractor_init],
     'city': [city_dictionary_extractor_init],
     'state': [state_dictionary_extractor],
@@ -380,11 +406,12 @@ class Extractor(object):
             start_time = time.time()
             output = extractor.extract(doc)
             time_taken = time.time() - start_time
-            if time_taken > 5.0:
-                print "Extractor %s took %s seconds for %s" % (extractor.get_name(), str(time_taken), doc['url'])
+            # if time_taken > 5.0:
+            #     print "Extractor %s took %s seconds for %s" % (extractor.get_name(), str(time_taken), doc['url'])
         except Exception as e:
             print e
             print "Extractor %s crashed." % extractor
+            raise
         # print "Document url %s" % doc['url']
         return output
 
@@ -469,39 +496,45 @@ class ProcessExtractor(Extractor):
             doc[levelKey] = {}
         # if self.landmark:
         #   doc = self.landmark.extract(doc)
-
+        ist_extractions = None
+        output = None
+        if 'extractions' in doc:
+            ist_extractions = doc['extractions']
         for input_key in inputs:
             extract_key = input_key
             for key, extractor in self.content_extractors.iteritems():
                 start_time = time.time()
                 if levelKey:
-                    # print extractor.get_metadata()
-                    if key == 'TITLE':
+                    if key == 'READABILITY_LOW_RECALL':
+                        if ist_extractions:
+                            if 'text' in ist_extractions and 'results' in ist_extractions['text'] and ist_extractions['text']['results']:
+                                # print 'Getting readability strict from ist'
+                                output = ist_extractions['text']['results'][0]
+                        if not output:
+                            # print 'Running readability'
+                            doc['html'] = doc[extract_key]
+                            output = Extractor.execute_extractor(extractor.type, doc)
+                    elif key == 'READABILITY_HIGH_RECALL':
+                        if 'extracted_text' in doc:
+                            # print 'Getting readabilit relaxed from TIKA'
+                            output = doc['extracted_text']
+                        if not output:
+                            doc['html'] = doc[extract_key]
+                            output = Extractor.execute_extractor(extractor.type, doc)
+                    elif key == 'TITLE':
                         doc['text'] = doc[extract_key]
-                    else:
-                        doc['html'] = doc[extract_key]
-                    output = Extractor.execute_extractor(extractor.type, doc)
-                    if key == 'TITLE':
-                        print output
+                        output = Extractor.execute_extractor(extractor.type, doc)
+                        if output:
+                            output = output[0]['value']
+
                     if not output:
                       continue
                     result = {'value': output}
                     metadata = extractor.type.get_metadata()
                     metadata['result'] = result
                     metadata['source'] = input_key
-                    print extractor.output
-                    doc[levelKey][extractor.output] = {'text': [metadata]}
-                time_taken = time.time() - start_time
-                # print "Time for " + key + " : ", time_taken
 
-        # if title_regex_extractor:
-        #     try:
-        #         doc = Extractor.extract_title(doc, title_regex_extractor)
-        #         # print pprint.pprint(doc['extractors']['title'], indent=4)
-        #     except Exception as e:
-        #         print e
-        #         print 'No Title found: ', doc['url']
-        #         raise
+                    doc[levelKey][extractor.output] = {'text': [metadata]}
         doc.pop('html', None)
         doc.pop('text', None)
         return doc
@@ -520,8 +553,9 @@ class ProcessExtractor(Extractor):
             tokens = Extractor.execute_extractor(tokenizer_extractor, temp)
             if tokens:
                 crf_tokens = tokens[0]
-                result = [{'result': {'value': crf_tokens[0]}}]
-                doc = self.update_json(doc, matches, 'crf_tokens', result, index, parent=True)
+                if len(crf_tokens) > 0:
+                    result = [{'result': {'value': crf_tokens[0]}}]
+                    doc = self.update_json(doc, matches, 'crf_tokens', result, index, parent=True)
         return doc, crf_tokens
 
     def addSimpleTokenizedData(self, doc, matches, index, crf_tokens):
@@ -533,7 +567,9 @@ class ProcessExtractor(Extractor):
     def addDataExtractorValues(self, doc, matches, index, text, simple_tokens):
         extractions = {}
 
-        if 'source' in text and text['source'] == 'landmark':
+        if 'source' in text and (text['source'] == 'landmark' or text['source'] == 'ist'):
+            if text['source'] == 'ist':
+                print 'IST'
             if text['type'] in inferlink_type_to_extractor_map and inferlink_type_to_extractor_map[text['type']]:
                 data_extractors = inferlink_type_to_extractor_map[text['type']]
             else:
@@ -703,7 +739,33 @@ class ProcessExtractor(Extractor):
 
                 doc['landmark'] = landmark
         doc.pop('landmarks', None)
+        doc.pop('raw_content', None)
+        doc.pop('extracted_text', None)
         # pprint.pprint(doc['landmark'], indent=2)
+        return doc
+
+    @staticmethod
+    def process_ist_extractions(doc):
+        processed_ist_extractions = dict()
+        if 'extractions' in doc:
+            ist_extractions = doc['extractions']
+            for key in ist_extractions.keys():
+                if key in inverse_ist_data_fields:
+                    semantic_type = inverse_ist_data_fields[key]
+                    value = ist_extractions[key]
+                    if 'results' in value and value['results'] and len(value['results']) > 0:
+                        value = value['results'][0]
+                        if value:
+                            processed_ist_extractions[key] = dict()
+                            processed_ist_extractions[key]['text'] = list()
+                            r_obj = dict()
+                            r_obj['result'] = dict()
+                            r_obj['result']['value'] = value
+                            r_obj['type'] = semantic_type
+                            r_obj['source'] = 'ist'
+                            processed_ist_extractions[key]['text'].append(r_obj)
+            if len(processed_ist_extractions.keys()) > 0:
+                doc['ist_extractions'] = processed_ist_extractions
         return doc
 
     def string_to_json(self, source):

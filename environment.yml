@@ -56,7 +56,7 @@ dependencies:
   - digLandmarkExtractor>=0.3.4
   - digAgeRegexExtractor>=0.3.0
   - digAddressExtractor>=0.3.0
-  - digPostingDateExtractor>=0.3.0
+  - digPostingDateExtractor>=0.3.1
   - digSocialMediaIdExtractor>=0.3.3
   - digCollaborativeExtractor>=0.1.6
   - digCityExtractor>=0.3.0

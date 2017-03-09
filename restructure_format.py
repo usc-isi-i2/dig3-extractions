@@ -94,8 +94,8 @@ def create_field_object(obj_dedup_semantic_types, value_type, value, field_name,
 
     out = dict()
     debug = False
-    if field_name == 'price':
-        debug = False
+    if field_name == 'gender':
+        debug = True
     if debug:
         print "Input value %s" % (value)
     if field_name in normalize_conf:
@@ -310,7 +310,11 @@ def consolidate_semantic_types(doc, normalize_conf, N):
         # handle title first
         title = None
         if 'title' in extractors:
-            title = extractors['title']['text'][0]['result'][0]
+            # print extractors['title']['text'][0]['result']
+            result = extractors['title']['text'][0]['result']
+            if isinstance(result, dict):
+                result = [result]
+            title = result[0]
         elif landmark and 'inferlink_title' in landmark:
             title = landmark['inferlink_title']['text'][0]['result']
         if title:

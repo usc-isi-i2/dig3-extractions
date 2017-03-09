@@ -271,7 +271,8 @@ class N(object):
 
     @staticmethod
     def clean_posting_date(x, conf):
-        x = x['value']
+        if isinstance(x, dict):
+            x = x['value']
         try:
             d = dateparser.parse(x).isoformat()
             o = dict()

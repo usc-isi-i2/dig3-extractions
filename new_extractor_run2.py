@@ -67,7 +67,8 @@ if __name__ == "__main__":
     # Init the extractors
     content_extractors = ['READABILITY_HIGH_RECALL', 'READABILITY_LOW_RECALL', 'TABLE', 'TITLE']
     data_extractors = ['age', 'phone', 'city', 'ethnicity', 'hair_color', 'eye_color', 'name', 'landmark', 'height',
-                       'weight', 'state', 'service', 'review_id', 'price', 'social_media_id', 'address', 'email']
+                       'weight', 'state', 'service', 'review_id', 'price', 'social_media_id', 'address', 'email',
+                       'posting_date']
     extraction_classifiers = ['city', 'ethnicity', 'hair_color', 'name', 'eye_color']
     properties = load_json_file(properties_file)
 
@@ -75,17 +76,14 @@ if __name__ == "__main__":
     pe = ProcessExtractor(content_extractors, data_extractors, properties, landmark_rules=landmark_rules, french_english_words=french_english_words)
 
     # Initialize the classifiers
-    # classifier_processor = ProcessClassifier(extraction_classifiers)
-    #
-    # # Initialize the ILP engine
-    # ilp_processor = ProcessILP(properties)
+    classifier_processor = ProcessClassifier(extraction_classifiers)
+
+    # Initialize the ILP engine
+    ilp_processor = ProcessILP(properties)
 
     o = codecs.open(output_file, 'w')
     i = 1
     for jl in jl_file_iterator(input_path):
-        if starting_line and i < starting_line:
-            i += 1
-            pass
         print '*' * 20, "Processing file, ", i, '*' * 20
         start_time = time.time()
         print "Building and running content extractors..."
@@ -98,6 +96,7 @@ if __name__ == "__main__":
         print "Total time for content(Readability + table): ", time_taken
 
         result_doc = pe.process_inferlink_fields(result_doc)
+        result_doc = pe.process_ist_extractions(result_doc)
 
         start_time_mid = time.time()
         result_doc = pe.buildTokensAndDataExtractors(result_doc)
@@ -106,11 +105,11 @@ if __name__ == "__main__":
 
         # Classifying the extractions using their context and appending the probabilities
         print "Classifying the extractions..."
-        # result_doc = classifier_processor.classify_extractions(result_doc)
-        # #
-        # # # Formulating and Solving the ILP for the extractions
-        # print "Formulating and Solving the ILP"
-        # result_doc = ilp_processor.run_ilp(result_doc)
+        result_doc = classifier_processor.classify_extractions(result_doc)
+        #
+        # # Formulating and Solving the ILP for the extractions
+        print "Formulating and Solving the ILP"
+        result_doc = ilp_processor.run_ilp(result_doc)
 
         time_taken = time.time() - start_time
         print "Total Time: ", time_taken
