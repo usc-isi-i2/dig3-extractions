@@ -365,6 +365,7 @@ class Extractor(object):
 
     @staticmethod
     def extract_title(doc, title_extractor):
+
         title_regex_processor = ExtractorProcessor() \
             .set_input_fields('raw_content') \
             .set_output_field('extractors.title.text') \
@@ -378,9 +379,6 @@ class Extractor(object):
         try:
             start_time = time.time()
             output = extractor.extract(doc)
-            metadata =  extractor.get_metadata()
-            if 'semantic_type' in metadata and metadata['semantic_type'] == 'social_media_id':
-                print output
             time_taken = time.time() - start_time
             if time_taken > 5.0:
                 print "Extractor %s took %s seconds for %s" % (extractor.get_name(), str(time_taken), doc['url'])
@@ -477,24 +475,35 @@ class ProcessExtractor(Extractor):
             for key, extractor in self.content_extractors.iteritems():
                 start_time = time.time()
                 if levelKey:
-                    doc['html'] = doc[extract_key]
+                    # print extractor.get_metadata()
+                    if key == 'TITLE':
+                        doc['text'] = doc[extract_key]
+                    else:
+                        doc['html'] = doc[extract_key]
                     output = Extractor.execute_extractor(extractor.type, doc)
+                    if key == 'TITLE':
+                        print output
                     if not output:
                       continue
                     result = {'value': output}
                     metadata = extractor.type.get_metadata()
                     metadata['result'] = result
                     metadata['source'] = input_key
+                    print extractor.output
                     doc[levelKey][extractor.output] = {'text': [metadata]}
                 time_taken = time.time() - start_time
-                print "Time for " + key + " : ", time_taken
+                # print "Time for " + key + " : ", time_taken
 
-        if title_regex_extractor:
-            try:
-                doc = Extractor.extract_title(doc, title_regex_extractor)
-                # print pprint.pprint(doc['extractors']['title'], indent=4)
-            except:
-                print 'No Title found: ', doc['url']
+        # if title_regex_extractor:
+        #     try:
+        #         doc = Extractor.extract_title(doc, title_regex_extractor)
+        #         # print pprint.pprint(doc['extractors']['title'], indent=4)
+        #     except Exception as e:
+        #         print e
+        #         print 'No Title found: ', doc['url']
+        #         raise
+        doc.pop('html', None)
+        doc.pop('text', None)
         return doc
 
     def addTokenizedData(self, doc, matches, index, data):

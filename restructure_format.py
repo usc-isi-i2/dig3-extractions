@@ -95,7 +95,7 @@ def create_field_object(obj_dedup_semantic_types, value_type, value, field_name,
     out = dict()
     debug = False
     if field_name == 'price':
-        debug = True
+        debug = False
     if debug:
         print "Input value %s" % (value)
     if field_name in normalize_conf:
@@ -106,24 +106,23 @@ def create_field_object(obj_dedup_semantic_types, value_type, value, field_name,
         end_time = time.time() - start_time
         if end_time > .05:
             print "Time taken to normalize %s : %f" % (value['value'], end_time)
-        if o:
-            if debug:
-                print "Output 1 %s" % (o)
-            return check_if_value_exists(o, obj_dedup_semantic_types, field_name, value_type)
-        else:
-            out['name'] = value['value']
-            if debug:
-                print "Output 2 %s" % (out)
-            return out, obj_dedup_semantic_types
 
-    out['key'] = value['value']
-    out['name'] = value['value']
-    if debug:
-        print "Output 3 %s" % (out)
-    return out, obj_dedup_semantic_types
+        if debug:
+            print "Output 1 %s" % (o)
+        return check_if_value_exists(o, obj_dedup_semantic_types, field_name, value_type)
+    print 'Make sure there is Normalize function for semantic type %s' % (field_name)
+    raise
+
+    # out['key'] = value['value']
+    # out['name'] = value['value']
+    # if debug:
+    #     print "Output 3 %s" % (out)
+    # return out, obj_dedup_semantic_types
 
 
 def check_if_value_exists(obj, dedup_list, field_name, value_type):
+    if not obj:
+        return obj, dedup_list
     out_list = list()
     if isinstance(obj, dict):
         obj = [obj]
@@ -371,6 +370,7 @@ def add_giant_oak_risk(x, giant_oak_risk_assessment):
     doc_id = x['doc_id']
     if doc_id in giant_oak_risk_assessment:
         risk = giant_oak_risk_assessment[doc_id]
+        print "adding risk %s for doc %s" % (risk, doc_id)
         if 'fields' not in x:
             x['fields'] = dict()
         fields = x['fields']

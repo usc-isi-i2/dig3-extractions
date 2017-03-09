@@ -2663,8 +2663,7 @@
                       "format": "strict_date_optional_time||epoch_millis"
                     },
                     "name": {
-                      "type": "date",
-                      "format": "strict_date_optional_time||epoch_millis"
+                      "type": "string"
                     }
                   }
                 },
@@ -2675,8 +2674,7 @@
                       "format": "strict_date_optional_time||epoch_millis"
                     },
                     "name": {
-                      "type": "date",
-                      "format": "strict_date_optional_time||epoch_millis"
+                      "type": "string"
                     }
                   }
                 }

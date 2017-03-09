@@ -75,12 +75,12 @@ if __name__ == "__main__":
     pe = ProcessExtractor(content_extractors, data_extractors, properties, landmark_rules=landmark_rules, french_english_words=french_english_words)
 
     # Initialize the classifiers
-    classifier_processor = ProcessClassifier(extraction_classifiers)
+    # classifier_processor = ProcessClassifier(extraction_classifiers)
+    #
+    # # Initialize the ILP engine
+    # ilp_processor = ProcessILP(properties)
 
-    # Initialize the ILP engine
-    ilp_processor = ProcessILP(properties)
-
-    o = codecs.open(output_file, 'a')
+    o = codecs.open(output_file, 'w')
     i = 1
     for jl in jl_file_iterator(input_path):
         if starting_line and i < starting_line:
@@ -106,11 +106,11 @@ if __name__ == "__main__":
 
         # Classifying the extractions using their context and appending the probabilities
         print "Classifying the extractions..."
-        result_doc = classifier_processor.classify_extractions(result_doc)
-        #
-        # # Formulating and Solving the ILP for the extractions
-        print "Formulating and Solving the ILP"
-        result_doc = ilp_processor.run_ilp(result_doc)
+        # result_doc = classifier_processor.classify_extractions(result_doc)
+        # #
+        # # # Formulating and Solving the ILP for the extractions
+        # print "Formulating and Solving the ILP"
+        # result_doc = ilp_processor.run_ilp(result_doc)
 
         time_taken = time.time() - start_time
         print "Total Time: ", time_taken
