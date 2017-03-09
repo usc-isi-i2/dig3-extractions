@@ -36,7 +36,27 @@ class ProcessILP():
       return TITLE_WEIGHT
     return DEFAULT_WEIGHT
 
+  def _posting_date_workaround(self, doc):
+    if('landmark' in doc):
+      landmark = doc['landmark']
+      if('inferlink_posting-date' in landmark):
+        posting_date  = landmark['inferlink_posting-date']
+        if('crf_tokens' in posting_date):
+          crf_tokens = posting_date['crf_tokens']
+          semantic_type = [{
+            'type':"posting_date",
+            'probability': 1,
+            'length': 1,
+            'offset': 0
+          }]
+          # Attaching semantic_type to all tokens
+          for token in crf_tokens:
+            if('type' in token and token['type'] == 'normal' and 'value' in token and token['value'].isalpha()):
+                token['semantic_type'] = semantic_type
+
   def run_ilp(self, doc):
+    self._posting_date_workaround(doc)
+
     expression = '*.*.crf_tokens'
     jsonpath_expr = parse(expression)
     matches = jsonpath_expr.find(doc)
