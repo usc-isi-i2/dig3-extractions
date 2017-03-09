@@ -411,7 +411,6 @@ class Extractor(object):
         except Exception as e:
             print e
             print "Extractor %s crashed." % extractor
-            raise
         # print "Document url %s" % doc['url']
         return output
 
@@ -568,8 +567,6 @@ class ProcessExtractor(Extractor):
         extractions = {}
 
         if 'source' in text and (text['source'] == 'landmark' or text['source'] == 'ist'):
-            if text['source'] == 'ist':
-                print 'IST'
             if text['type'] in inferlink_type_to_extractor_map and inferlink_type_to_extractor_map[text['type']]:
                 data_extractors = inferlink_type_to_extractor_map[text['type']]
             else:
@@ -642,7 +639,7 @@ class ProcessExtractor(Extractor):
                     pass
 
                 if 'tokens' not in input_type:
-                    print "ignoring ", extractor, " as tokens not dependant.."
+                    # print "ignoring ", extractor, " as tokens not dependant.."
                     continue
                 data = extraction['result']
                 for values in data:
