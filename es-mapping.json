@@ -2663,7 +2663,8 @@
                       "format": "strict_date_optional_time||epoch_millis"
                     },
                     "name": {
-                      "type": "string"
+                      "type": "date",
+                      "format": "strict_date_optional_time||epoch_millis"
                     }
                   }
                 },
@@ -2674,7 +2675,8 @@
                       "format": "strict_date_optional_time||epoch_millis"
                     },
                     "name": {
-                      "type": "string"
+                      "type": "date",
+                      "format": "strict_date_optional_time||epoch_millis"
                     }
                   }
                 }
@@ -3905,7 +3907,7 @@
         },
         "tld": {
           "type": "string",
-          "analyzer": "url_component_analyzer", 
+          "analyzer": "url_component_analyzer",
           "fields": {
             "raw": {
               "type": "string",
@@ -3915,7 +3917,7 @@
         },
         "url": {
           "type": "string",
-          "analyzer": "url_component_analyzer", 
+          "analyzer": "url_component_analyzer",
           "fields": {
             "raw": {
               "type": "string",
@@ -3975,8 +3977,7 @@
         "created": "2040199"
       }
     },
-    "analysis":
-    {
+    "analysis": {
       "analyzer": {
         "url_component_analyzer": {
           "tokenizer": "url_component_tokenizer",
@@ -3994,7 +3995,7 @@
         }
       },
       "filter": {
-        "url_component_filter":{
+        "url_component_filter": {
           "type": "lowercase"
         }
       }
