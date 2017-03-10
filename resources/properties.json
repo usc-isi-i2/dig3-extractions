@@ -1,19 +1,23 @@
 {
-    "names_low_precision":"female-names-master.json",
-    "names_high_precision":"female-names-trimmed.json",
-    "ethnicities":"ethnicities.json",
+  "names_low_precision": "female-names-master.json",
+  "names_high_precision": "female-names-trimmed.json",
+  "ethnicities": "ethnicities.json",
   "cities": "curated_cities.json",
-  "haircolor": "haircolors.json",
+ "haircolor": "haircolors.json",
   "eyecolor": "eyecolors.json",
   "states": "states_usa_canada.json",
   "stop_words": "stop_words.json",
   "country_codes_dict": "country_codes_dict.json",
   "countries": "countries.json",
   "cities_without_spaces": "cities_without_spaces.json",
-      "english_words":"english.json",
-    "french_words":"french.json",
+  "english_words": "english.json",
+  "us_canada_states": "states_usa_canada.json",
+  "french_words": "french.json",
   "state_country":"state_country_dict.json",
   "city_country": "city_country_dict_15000.json",
   "phone2city": "phone2city_dict.json",
-  "us_canada_states": "states_usa_canada.json"
+  "city_state": "city_state_dict.json",
+  "city_alt": "city_dict_alt_15000.json",
+  "city_all": "city_dict_15000.json"
+
 }
