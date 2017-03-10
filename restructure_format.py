@@ -43,10 +43,11 @@ def get_value_sem_type(tokens):
                 if 'read' not in sem_t:
                     # print token
                     # print sem_t
-                    if 'length' in sem_t and 'probability' in sem_t and sem_t['probability'] > 0.2:
+                    if 'length' in sem_t and 'probability' in sem_t and sem_t['probability'] > 0.2 and sem_t['type'] != 'posting_date':
                         # this token is the first of 'length' values for this field
                         length = sem_t['length']
                         field = sem_t['type']
+                        # print 'GDOKLNBVCNGFHIHOJK:KLBVHCGIOP{', field
                         val = token['value']
                         length -= 1  # read the remaining length - 1 tokens to contruct the full value
                         offset = sem_t['offset']
@@ -94,8 +95,8 @@ def create_field_object(obj_dedup_semantic_types, value_type, value, field_name,
 
     out = dict()
     debug = False
-    if field_name == 'gender':
-        debug = True
+    if field_name == 'posting_date':
+        debug = False
     if debug:
         print "Input value %s" % (value)
     if field_name in normalize_conf:
@@ -196,7 +197,8 @@ def consolidate_extractor_values(extraction):
 
 
 def get_strict_crf_tokens(doc):
-    strict_crf_tokens_paths = ['landmark.*.crf_tokens', 'extractors.content_strict.crf_tokens']
+    strict_crf_tokens_paths = ['landmark.*.crf_tokens', 'extractors.content_strict.crf_tokens',
+                               'ist_extractions.*.crf_tokens']
     strict_crf_tokens = list()
     for path in strict_crf_tokens_paths:
         expr = parse(path)
@@ -237,7 +239,7 @@ def handle_strict_data_extractions(doc, semantic_type_objs, obj_dedup_semantic_t
                         normalize_conf, N)
 
     strict_de_paths = ['landmark.*.data_extractors', 'extractors.content_strict.data_extractors',
-                       'extractors.title.data_extractors']
+                       'extractors.title.data_extractors', 'ist_extractions.*.data_extractors']
     for path in strict_de_paths:
         expr = parse(path)
         matches = expr.find(doc)
@@ -373,22 +375,25 @@ def create_list_objs(obj_list):
 def add_giant_oak_risk(x, giant_oak_risk_assessment):
     doc_id = x['doc_id']
     if doc_id in giant_oak_risk_assessment:
-        risk = giant_oak_risk_assessment[doc_id]
-        print "adding risk %s for doc %s" % (risk, doc_id)
-        if 'fields' not in x:
-            x['fields'] = dict()
-        fields = x['fields']
-        if 'risk' not in fields:
-            fields['risk'] = dict()
+        # risk = giant_oak_risk_assessment[doc_id]
+        risk = 'yes'
+    else:
+        risk = 'no'
+    # print "adding risk %s for doc %s" % (risk, doc_id)
+    if 'fields' not in x:
+        x['fields'] = dict()
+    fields = x['fields']
+    if 'risk' not in fields:
+        fields['risk'] = dict()
 
-        if 'strict' not in fields['risk']:
-            fields['risk']['strict'] = list()
-        if risk not in create_list_objs(fields['risk']['strict']):
-            o = dict()
-            o['key'] = risk
-            o['name'] = risk
-            fields['risk']['strict'].append(o)
-        x['fields'] = fields
+    if 'strict' not in fields['risk']:
+        fields['risk']['strict'] = list()
+    if risk not in create_list_objs(fields['risk']['strict']):
+        o = dict()
+        o['key'] = risk
+        o['name'] = risk
+        fields['risk']['strict'].append(o)
+    x['fields'] = fields
     return x
 
 

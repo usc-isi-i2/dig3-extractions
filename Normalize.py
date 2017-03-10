@@ -151,16 +151,7 @@ class N(object):
                         o['key'] = centimeters
                         o['search'] = N.convert_height_all_units(centimeters)
                         o_list.append(o)
-
-                    if len(o_list) > 0:
-                        # print o_list
-                        return o_list
-            else:
-                # case where the  returned a raw foot value but no centimeters
-                # {u'foot': [], u'raw': [{u'foot': 2.0}], u'centimeter': []}
-                o = dict()
-                o['name'] = x['raw'][0]['foot']
-                o_list.append(o)
+            if len(o_list) > 0:
                 return o_list
         return None
 
@@ -265,24 +256,28 @@ class N(object):
                 if N.sanity_check_values(clean_weight_value, conf) is not None:
                     o['key'] = clean_weight_value
                 o_list.append(o)
-                if len(o_list) > 0:
-                    return o_list
+            if len(o_list) > 0:
+                return o_list
         return None
 
     @staticmethod
     def clean_posting_date(x, conf):
         if isinstance(x, dict):
+            # print 'DICT DATE', x
             x = x['value']
-        try:
-            d = dateparser.parse(x).isoformat()
-            o = dict()
-            o['name'] = d
-            o['key'] = d
-            return o
-        except Exception as e:
-            print e
-            print 'Failed to parse %s as date' % (x)
-        return None
+            try:
+                d = dateparser.parse(x).isoformat()
+            except:
+                print 'Failed to parse %s as date' % (x)
+                return None
+        elif isinstance(x, basestring):
+            # print 'BASESRING DATE', x
+            d = x
+        o = dict()
+        o['name'] = d
+        o['key'] = d
+        return o
+
 
     def clean_ethnicity(self, x, conf):
         x = x['value']
@@ -305,6 +300,7 @@ class N(object):
             o = dict()
             o['name'] = eye_color
             o['key'] = eye_color
+            o['search'] = x + " " + eye_color
             return o
         return None
 
@@ -317,6 +313,7 @@ class N(object):
             o = dict()
             o['name'] = hair_color
             o['key'] = hair_color
+            o['search'] = x + " " + hair_color
             return o
         return None
 
@@ -395,23 +392,25 @@ class N(object):
         if 'price_per_hour' in x:
             pphs = x['price_per_hour']
             for pph in pphs:
-                out = dict()
-                out['name'] = pph + ' $ per hour'
                 v = N.sanity_check_values(pph, conf)
                 if v and v.endswith('0'):
+                    out = dict()
+                    out['name'] = v + ' $ per hour'
                     out['key'] = v + ' $ per hour'
-                o_list.append(out)
+                    o_list.append(out)
         if 'price' in x:
             ps = x['price']
             for p in ps:
                 if N.check_if_add_price(p['price'], pphs):
-                        out = dict()
-                        out['name'] = p['price'] + ' ' + p['price_unit'] + ' per ' + p['time_unit']
                         v = N.sanity_check_values(p['price'], conf)
                         if v and v.endswith('0'):
+                            out = dict()
+                            out['name'] = v + ' ' + p['price_unit'] + ' per ' + p['time_unit']
                             out['key'] = v + ' ' + p['price_unit'] + ' per ' + p['time_unit']
-                        o_list.append(out)
-        return o_list
+                            o_list.append(out)
+        if len(o_list) > 0:
+            return o_list
+        return None
 
     @staticmethod
     def check_if_add_price(price, price_per_hour):
