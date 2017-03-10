@@ -4,7 +4,7 @@ import sys
 from optparse import OptionParser
 from initClassifiers import ProcessClassifier
 from initILP import ProcessILP
-from hadoop.io import SequenceFile
+from pyspark import SparkContext
 
 def load_json_file(file_name):
     rules = json.load(codecs.open(file_name, 'r'))
@@ -12,6 +12,9 @@ def load_json_file(file_name):
 
 
 if __name__ == "__main__":
+    compression = "org.apache.hadoop.io.compress.GzipCodec"
+    sc = SparkContext(appName="Memex Eval 2017 ILP Workflow")
+
     parser = OptionParser()
     (c_options, args) = parser.parse_args()
 
@@ -31,19 +34,13 @@ if __name__ == "__main__":
     # Initialize the ILP engine
     ilp_processor = ProcessILP(properties)
 
-    reader = SequenceFile.Reader(input_path)
-
-    key_class = reader.getKeyClass()
-    value_class = reader.getValueClass()
-
-    key = key_class()
-    value = value_class()
-
-    position = reader.getPosition()
-    o = codecs.open(output_file, 'w')
-    while reader.next(key, value):
-        jl = json.loads(value.toString())
-        result_doc = classifier_processor.classify_extractions(jl)
-        result_doc = ilp_processor.run_ilp(result_doc)
-        o.write(json.dumps(result_doc) + '\n')
-    o.close()
+    input_rdd = sc.sequenceFile(input_path).mapValues(json.loads)
+    processed_rdd = input_rdd.mapValues(classifier_processor.classify_extractions).mapValues(ilp_processor.run_ilp)
+    processed_rdd.mapValues(json.dumps).saveAsSequenceFile(output_file, compressionCodecClass=compression)
+    #
+    # while reader.next(key, value):
+    #     jl = json.loads(value.toString())
+    #     result_doc = classifier_processor.classify_extractions(jl)
+    #     result_doc = ilp_processor.run_ilp(result_doc)
+    #     o.write(json.dumps(result_doc) + '\n')
+    # o.close()
