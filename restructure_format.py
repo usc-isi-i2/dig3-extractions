@@ -41,35 +41,38 @@ def get_value_sem_type(tokens):
                 sem_t = sem_types[j]
                 # only process this token, if its not already read by a previous iteration
                 if 'read' not in sem_t:
-                    # print token
-                    # print sem_t
-                    if 'length' in sem_t and 'probability' in sem_t and sem_t['probability'] > 0.2 and sem_t['type'] != 'posting_date':
-                        # this token is the first of 'length' values for this field
-                        length = sem_t['length']
-                        field = sem_t['type']
-                        # print 'GDOKLNBVCNGFHIHOJK:KLBVHCGIOP{', field
-                        val = token['value']
-                        length -= 1  # read the remaining length - 1 tokens to contruct the full value
-                        offset = sem_t['offset']
-                        temp_i = i
-                        while length > 0 :
-                            temp_i += 1
-                            offset += 1
-                            val += ' ' + tokens[temp_i]['value']
-                            updated_sem_types = update_semantic_types_token(tokens[temp_i], offset)
-                            tokens[temp_i][SEM_TYPE] = updated_sem_types
-                            length -= 1
+                    if sem_t['type'] != 'posting_date':
+                        if 'selected' in sem_t:
+                            sem_t['probability'] = 1.0
+                        if 'probability' in sem_t and sem_t['probability'] > 0.2:
+                            if 'length' in sem_t:
+                                # this token is the first of 'length' values for this field
+                                length = sem_t['length']
+                                field = sem_t['type']
+                                # print 'GDOKLNBVCNGFHIHOJK:KLBVHCGIOP{', field
+                                val = token['value']
+                                length -= 1  # read the remaining length - 1 tokens to contruct the full value
+                                offset = sem_t['offset']
+                                temp_i = i
+                                while length > 0 :
+                                    temp_i += 1
+                                    offset += 1
+                                    val += ' ' + tokens[temp_i]['value']
+                                    updated_sem_types = update_semantic_types_token(tokens[temp_i], offset)
+                                    tokens[temp_i][SEM_TYPE] = updated_sem_types
+                                    length -= 1
 
-                        if field not in semantic_type_values:
-                            semantic_type_values[field] = list()
-                        obj = dict()
-                        obj['value'] = val.strip()
-                        for key in sem_t.keys():
-                            if key != 'value':
-                                obj[key] = sem_t[key]
-                        semantic_type_values[field].append(obj)
-                    tokens[i][SEM_TYPE][j]['read'] = True
+                                if field not in semantic_type_values:
+                                    semantic_type_values[field] = list()
+                                obj = dict()
+                                obj['value'] = val.strip()
+                                for key in sem_t.keys():
+                                    if key != 'value':
+                                        obj[key] = sem_t[key]
+                                semantic_type_values[field].append(obj)
+                            tokens[i][SEM_TYPE][j]['read'] = True
     for key in semantic_type_values.keys():
+        # print key
         semantic_type_values[key].sort(key=lambda x: x['probability'], reverse=True)
     return semantic_type_values
 
@@ -135,8 +138,71 @@ def check_if_value_exists(obj, dedup_list, field_name, value_type):
     return (out_list, dedup_list) if len(out_list) > 0 else (None, dedup_list)
 
 
+def handle_name_eth_eye_hair(obj_semantic_types, obj_dedup_semantic_types, semantic_type, values,
+                                          value_type, normalize_conf, N, gurobi):
+    for val in values:
+        out = None
+        value_in = ''
+        if gurobi:
+            if ('selected' in val or ('probability' in val and val['probability'] >= probability_threshold)) or value_type == 'landmark':
+                out, obj_dedup_semantic_types = create_field_objects(obj_dedup_semantic_types, 'strict', val,
+                                                                     semantic_type, normalize_conf, N)
+                value_in = 'strict'
+
+        elif value_type == 'strict' or value_type == 'landmark':
+            out, obj_dedup_semantic_types = create_field_objects(obj_dedup_semantic_types, 'strict', val,
+                                                                 semantic_type, normalize_conf, N)
+            value_in = 'strict'
+        else:
+            out, obj_dedup_semantic_types = create_field_objects(obj_dedup_semantic_types, 'relaxed', val,
+                                                                 semantic_type, normalize_conf, N)
+            value_in = 'relaxed'
+        if out:
+            if isinstance(out, dict):
+                out = [out]
+            if value_in == 'strict':
+                obj_semantic_types[semantic_type]['strict'].extend(out)
+            obj_semantic_types[semantic_type]['relaxed'].extend(out)
+
+    return obj_semantic_types, obj_dedup_semantic_types
+
+
+def handle_city(obj_semantic_types, obj_dedup_semantic_types, semantic_type, values,
+                                          value_type, normalize_conf, N, gurobi):
+    for val in values:
+        if gurobi:
+            if 'selected' in val or ('probability' in val and val['probability'] >= probability_threshold):
+                out, obj_dedup_semantic_types = create_field_objects(obj_dedup_semantic_types, 'strict', val,
+                                                                     semantic_type, normalize_conf, N)
+                if out:
+                    if isinstance(out, dict):
+                        out = [out]
+                    obj_semantic_types[semantic_type]['strict'].extend(out)
+                    obj_semantic_types[semantic_type]['relaxed'].extend(out)
+        if value_type == 'landmark' or value_type == 'strict':
+            out, obj_dedup_semantic_types = create_field_objects(obj_dedup_semantic_types, 'strict', val,
+                                                                 semantic_type, normalize_conf, N)
+            if out:
+                if isinstance(out, dict):
+                    out = [out]
+                obj_semantic_types[semantic_type]['strict'].extend(out)
+                obj_semantic_types[semantic_type]['relaxed'].extend(out)
+        if value_type == 'relaxed':
+            out, obj_dedup_semantic_types = create_field_objects(obj_dedup_semantic_types, 'relaxed', val,
+
+                                                                 semantic_type, normalize_conf, N)
+            if out:
+                if isinstance(out, dict):
+                    out = [out]
+                obj_semantic_types[semantic_type]['relaxed'].extend(out)
+
+    return obj_semantic_types, obj_dedup_semantic_types
+
+
+
+
 def add_objects_to_semantic_types_for_gui(obj_semantic_types, obj_dedup_semantic_types, semantic_type, values,
-                                          value_type, normalize_conf, N):
+                                          value_type, normalize_conf, N, gurobi):
 
     if semantic_type not in obj_dedup_semantic_types:
         obj_dedup_semantic_types[semantic_type] = dict()
@@ -152,36 +218,37 @@ def add_objects_to_semantic_types_for_gui(obj_semantic_types, obj_dedup_semantic
     if 'relaxed' not in obj_semantic_types[semantic_type]:
         obj_semantic_types[semantic_type]['relaxed'] = list()
 
-    if value_type == 'strict':
+    if semantic_type == 'name' or semantic_type == 'ethnicity' or semantic_type == 'eye_color' or semantic_type == 'hair_color':
+        # print 'sm', semantic_type
+        obj_semantic_types, obj_dedup_semantic_types = handle_name_eth_eye_hair(obj_semantic_types,
+                                                                                obj_dedup_semantic_types,
+                                                                                semantic_type, values,
+                                                                                value_type, normalize_conf, N, gurobi)
+
+    elif semantic_type == 'city':
+        obj_semantic_types, obj_dedup_semantic_types = handle_city(obj_semantic_types,
+                                                                                obj_dedup_semantic_types,
+                                                                                semantic_type, values,
+                                                                                value_type, normalize_conf, N, gurobi)
+    else:
         for val in values:
+            value_in = ''
             if 'selected' in val \
-                    or ('probability' in val and val['probability'] >= probability_threshold) \
-                    or len(obj_semantic_types[semantic_type][value_type]) == 0:
-                out, obj_dedup_semantic_types = create_field_objects(obj_dedup_semantic_types, value_type, val,
+                    or ('probability' in val and val['probability'] >= probability_threshold) or value_type == 'landmark' or value_type == 'strict':
+                out, obj_dedup_semantic_types = create_field_objects(obj_dedup_semantic_types, 'strict', val,
                                                                      semantic_type, normalize_conf, N)
 
-                if out:
-                    # print "1. Appending to %s %s %s" % (semantic_type, value_type, out)
-                    if isinstance(out, list):
-                        obj_semantic_types[semantic_type][value_type].extend(out)
-                    else:
-                        obj_semantic_types[semantic_type][value_type].append(out)
             else:
                 out, obj_dedup_semantic_types = create_field_objects(obj_dedup_semantic_types, 'relaxed', val,
                                                                      semantic_type, normalize_conf, N)
-                if out:
-                    # print "2. Appending to %s %s %s" % (semantic_type, 'relaxed', out)
-                    if isinstance(out, list):
-                        obj_semantic_types[semantic_type]['relaxed'].extend(out)
-                    else:
-                        obj_semantic_types[semantic_type]['relaxed'].append(out)
-    elif value_type == 'relaxed':
-        out, obj_dedup_semantic_types = create_field_objects(obj_dedup_semantic_types, value_type, values,
-                                                             semantic_type, normalize_conf, N)
+                value_in = 'relaxed'
+            if out:
+                if isinstance(out, dict):
+                    out = [out]
+                if value_in == 'strict':
+                    obj_semantic_types[semantic_type]['strict'].extend(out)
+                obj_semantic_types[semantic_type]['relaxed'].extend(out)
 
-        if out:
-            # print "3. Appending to %s %s %s" % (semantic_type, value_type, out)
-            obj_semantic_types[semantic_type][value_type].extend(out)
     return obj_semantic_types, obj_dedup_semantic_types
 
 
@@ -221,7 +288,7 @@ def get_relaxed_crf_tokens(doc):
     return relaxed_crf_tokens
 
 
-def handle_strict_data_extractions(doc, semantic_type_objs, obj_dedup_semantic_types, N):
+def handle_strict_data_extractions(doc, semantic_type_objs, obj_dedup_semantic_types, N, gurobi):
     # process landmark extractions except title and description
     if 'landmark' in doc and doc['landmark']:
         landmark = doc['landmark']
@@ -235,8 +302,8 @@ def handle_strict_data_extractions(doc, semantic_type_objs, obj_dedup_semantic_t
                     extraction = consolidate_extractor_values(l_extraction_text)
                     semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(
                         semantic_type_objs, obj_dedup_semantic_types,
-                        key, extraction, 'strict',
-                        normalize_conf, N)
+                        key, extraction, 'landmark',
+                        normalize_conf, N, gurobi)
 
     strict_de_paths = ['landmark.*.data_extractors', 'extractors.content_strict.data_extractors',
                        'extractors.title.data_extractors', 'ist_extractions.*.data_extractors']
@@ -247,15 +314,18 @@ def handle_strict_data_extractions(doc, semantic_type_objs, obj_dedup_semantic_t
             de = match.value
             for key in de.keys():
                 extraction = consolidate_extractor_values(de[key])
+                if 'landmark' in str(match.full_path):
+                    value_in = 'landmark'
+                else:
+                    value_in = 'strict'
                 semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(
                             semantic_type_objs, obj_dedup_semantic_types,
-                            key, extraction, 'strict',
-                            normalize_conf, N)
-
+                            key, extraction, value_in,
+                            normalize_conf, N, gurobi)
     return semantic_type_objs, obj_dedup_semantic_types
 
 
-def handle_relaxed_data_extractions(doc, semantic_type_objs, obj_dedup_semantic_types, N):
+def handle_relaxed_data_extractions(doc, semantic_type_objs, obj_dedup_semantic_types, N, gurobi):
     relaxed_de_paths = ['extractors.content_relaxed.data_extractors']
     for path in relaxed_de_paths:
         expr = parse(path)
@@ -268,11 +338,11 @@ def handle_relaxed_data_extractions(doc, semantic_type_objs, obj_dedup_semantic_
                 semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(
                             semantic_type_objs, obj_dedup_semantic_types,
                             key, extraction, 'relaxed',
-                            normalize_conf, N)
+                            normalize_conf, N, gurobi)
     return semantic_type_objs, obj_dedup_semantic_types
 
 
-def consolidate_semantic_types(doc, normalize_conf, N):
+def consolidate_semantic_types(doc, normalize_conf, N, gurobi):
     semantic_type_objs = dict()
     obj_dedup_semantic_types = dict()
 
@@ -283,7 +353,7 @@ def consolidate_semantic_types(doc, normalize_conf, N):
         for key in strict_semantic_types.keys():
             semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(
                 semantic_type_objs, obj_dedup_semantic_types, key, strict_semantic_types[key], 'strict',
-                normalize_conf, N)
+                normalize_conf, N, gurobi)
 
     # handle semantic types from relaxed crf tokens
     relaxed_crf_tokens = get_relaxed_crf_tokens(doc)
@@ -293,44 +363,51 @@ def consolidate_semantic_types(doc, normalize_conf, N):
             semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(
                 semantic_type_objs, obj_dedup_semantic_types,
                 key, relaxed_semantic_types[key],
-                'relaxed', normalize_conf, N)
+                'relaxed', normalize_conf, N, gurobi)
 
     # handle strict data extractions
     semantic_type_objs, obj_dedup_semantic_types = handle_strict_data_extractions(doc, semantic_type_objs,
-                                                                                  obj_dedup_semantic_types, N)
+                                                                                  obj_dedup_semantic_types, N, gurobi)
 
     # handle relaxed data extractions
     semantic_type_objs, obj_dedup_semantic_types = handle_relaxed_data_extractions(doc, semantic_type_objs,
-                                                                                  obj_dedup_semantic_types, N)
+                                                                                  obj_dedup_semantic_types, N, gurobi)
     landmark = None
     if 'landmark' in doc:
         landmark = doc['landmark']
 
+    extractors=None
     if 'extractors' in doc:
         extractors = doc['extractors']
 
-        # handle title first
-        title = None
+    title = None
+    # handle title first
+    if extractors:
         if 'title' in extractors:
             # print extractors['title']['text'][0]['result']
             result = extractors['title']['text'][0]['result']
             if isinstance(result, dict):
                 result = [result]
             title = result[0]
-        elif landmark and 'inferlink_title' in landmark:
-            title = landmark['inferlink_title']['text'][0]['result']
-        if title:
-            title = [title]
-            semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(semantic_type_objs,
-                                                                                                 obj_dedup_semantic_types,
-                                                                                                 'title', title,
-                                                                                                 'strict',
-                                                                                                 normalize_conf, N)
-            semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(semantic_type_objs,
-                                                                                                 obj_dedup_semantic_types,
-                                                                                                 'title', title,
-                                                                                                 'relaxed',
-                                                                                                 normalize_conf, N)
+    elif landmark and 'inferlink_title' in landmark:
+        title = landmark['inferlink_title']['text'][0]['result']
+    elif 'extractions' in doc and 'title' in doc['extractions'] and 'results' in doc['extractions']['title']:
+        t_r = doc['extractions']['title']['results']
+        if isinstance(t_r, list) and len(t_r) > 0:
+                title = doc['extractions']['title']['results'][0]
+    if title:
+        title = [title]
+        semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(semantic_type_objs,
+                                                                                             obj_dedup_semantic_types,
+                                                                                             'title', title,
+                                                                                             'strict',
+                                                                                             normalize_conf, N, gurobi)
+        semantic_type_objs, obj_dedup_semantic_types = add_objects_to_semantic_types_for_gui(semantic_type_objs,
+                                                                                             obj_dedup_semantic_types,
+                                                                                             'title', title,
+                                                                                             'relaxed',
+                                                                               normalize_conf, N, gurobi)
+    if extractors:
         # now strict semantic types
         if 'content_strict' in extractors:
             content_strict = extractors['content_strict']
@@ -346,8 +423,8 @@ def consolidate_semantic_types(doc, normalize_conf, N):
                                                                                                      'description',
                                                                                                      description,
                                                                                                      'strict',
-                                                                                                     normalize_conf, N)
-
+                                                                                                     normalize_conf, N, gurobi)
+    if extractors:
         if 'content_relaxed' in extractors:
             content_relaxed = extractors['content_relaxed']
             description = None
@@ -360,7 +437,7 @@ def consolidate_semantic_types(doc, normalize_conf, N):
                                                                                                      'description',
                                                                                                      description,
                                                                                                      'relaxed',
-                                                                                                     normalize_conf, N)
+                                                                                                     normalize_conf, N, gurobi)
     doc.pop('html', None)
     doc[FIELDS] = semantic_type_objs
     return doc
@@ -405,7 +482,7 @@ if __name__ == "__main__":
     output_file = args[1]
     normalize_conf_file = args[2]
     hybrid_jaccard_conf_file = args[3]
-
+    gurobi_o = args[4]
 
     giant_oak_risk_assessment = None
     giant_oak_file = c_options.giantOakRisk
@@ -413,6 +490,10 @@ if __name__ == "__main__":
         giant_oak_risk_assessment = json.load(codecs.open(giant_oak_file, 'r'))
 
     hybrid_jaccard_config = json.load(codecs.open(hybrid_jaccard_conf_file, 'r'))
+    gurobi = False
+    if gurobi_o == 'yes':
+        gurobi = True
+
     # print hybrid_jaccard_config
     N_O = NO(hybrid_jaccard_config=hybrid_jaccard_config)
     normalize_conf = json.load(codecs.open(normalize_conf_file, 'r', 'utf-8'))
@@ -424,7 +505,7 @@ if __name__ == "__main__":
         x = json.loads(line)
         s_t = time.time()
         print 'processing line # %d' % (i)
-        result = consolidate_semantic_types(x, normalize_conf, N_O)
+        result = consolidate_semantic_types(x, normalize_conf, N_O, gurobi)
         if giant_oak_risk_assessment:
             result = add_giant_oak_risk(result, giant_oak_risk_assessment)
         o.write(json.dumps(result))

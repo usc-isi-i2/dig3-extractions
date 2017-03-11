@@ -350,7 +350,8 @@ class N(object):
 
     @staticmethod
     def identity(x, conf=None):
-        x = x['value']
+        if isinstance(x, dict):
+            x = x['value']
         o = dict()
         o['name'] = x
         return o

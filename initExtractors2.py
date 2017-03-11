@@ -763,7 +763,7 @@ class ProcessExtractor(Extractor):
                             processed_ist_extractions[key]['text'].append(r_obj)
             if len(processed_ist_extractions.keys()) > 0:
                 doc['ist_extractions'] = processed_ist_extractions
-        doc.pop('extractions', None)
+        # doc.pop('extractions', None)
         return doc
 
     def string_to_json(self, source):
