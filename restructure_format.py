@@ -1,7 +1,7 @@
-import json
-from optparse import OptionParser
-import codecs
-from Normalize import N as NO
+# import json
+# from optparse import OptionParser
+# import codecs
+# from Normalize import N as NO
 import time
 from jsonpath_rw import parse, jsonpath
 
@@ -17,6 +17,7 @@ probability_threshold = 0.5
 # blacklist for inferlink fields on which we do not want to run normalizer
 # because it's already run or can't be run
 inferlink_blacklist  = ['phone', 'nothing']
+ist_white_list = ['age','city','posting_date','review_id']
 
 def update_semantic_types_token(token, offset):
     sem_types = token[SEM_TYPE]
@@ -98,24 +99,26 @@ def create_field_object(obj_dedup_semantic_types, value_type, value, field_name,
 
     out = dict()
     debug = False
-    if field_name == 'posting_date':
+    if field_name == 'name':
+
         debug = False
+        # print normalize_conf
     if debug:
         print "Input value %s" % (value)
+        print value_type
     if field_name in normalize_conf:
         f_conf = normalize_conf[field_name]
         func = getattr(N, f_conf['function'])
         start_time = time.time()
         o = func(value, f_conf)
         end_time = time.time() - start_time
-        if end_time > .05:
-            print "Time taken to normalize %s : %f" % (value['value'], end_time)
+        # print "Time taken to normalize %s : %f" % (value['value'], end_time)
 
         if debug:
             print "Output 1 %s" % (o)
         return check_if_value_exists(o, obj_dedup_semantic_types, field_name, value_type)
     print 'Make sure there is Normalize function for semantic type %s' % (field_name)
-    raise
+    # raise ValueError('jfhksldhj' + field_name)
 
     # out['key'] = value['value']
     # out['name'] = value['value']
@@ -144,10 +147,15 @@ def handle_name_eth_eye_hair(obj_semantic_types, obj_dedup_semantic_types, seman
         out = None
         value_in = ''
         if gurobi:
-            if ('selected' in val or ('probability' in val and val['probability'] >= probability_threshold)) or value_type == 'landmark':
-                out, obj_dedup_semantic_types = create_field_objects(obj_dedup_semantic_types, 'strict', val,
+            if value_type == 'strict' or value_type == 'landmark':
+                if 'selected' in val or ('probability' in val and val['probability'] >= probability_threshold):
+                    out, obj_dedup_semantic_types = create_field_objects(obj_dedup_semantic_types, 'strict', val,
+                                                                         semantic_type, normalize_conf, N)
+                    value_in = 'strict'
+            elif value_type == 'relaxed':
+                out, obj_dedup_semantic_types = create_field_objects(obj_dedup_semantic_types, 'relaxed', val,
                                                                      semantic_type, normalize_conf, N)
-                value_in = 'strict'
+                value_in = 'relaxed'
 
         elif value_type == 'strict' or value_type == 'landmark':
             out, obj_dedup_semantic_types = create_field_objects(obj_dedup_semantic_types, 'strict', val,
@@ -233,10 +241,11 @@ def add_objects_to_semantic_types_for_gui(obj_semantic_types, obj_dedup_semantic
     else:
         for val in values:
             value_in = ''
-            if 'selected' in val \
-                    or ('probability' in val and val['probability'] >= probability_threshold) or value_type == 'landmark' or value_type == 'strict':
+            if ('selected' in val \
+                    or ('probability' in val and val['probability'] >= probability_threshold)) or value_type == 'landmark' or value_type == 'strict':
                 out, obj_dedup_semantic_types = create_field_objects(obj_dedup_semantic_types, 'strict', val,
                                                                      semantic_type, normalize_conf, N)
+                value_in = 'strict'
 
             else:
                 out, obj_dedup_semantic_types = create_field_objects(obj_dedup_semantic_types, 'relaxed', val,
@@ -288,7 +297,7 @@ def get_relaxed_crf_tokens(doc):
     return relaxed_crf_tokens
 
 
-def handle_strict_data_extractions(doc, semantic_type_objs, obj_dedup_semantic_types, N, gurobi):
+def handle_strict_data_extractions(doc, semantic_type_objs, obj_dedup_semantic_types, N, gurobi, normalize_conf):
     # process landmark extractions except title and description
     if 'landmark' in doc and doc['landmark']:
         landmark = doc['landmark']
@@ -325,7 +334,7 @@ def handle_strict_data_extractions(doc, semantic_type_objs, obj_dedup_semantic_t
     return semantic_type_objs, obj_dedup_semantic_types
 
 
-def handle_relaxed_data_extractions(doc, semantic_type_objs, obj_dedup_semantic_types, N, gurobi):
+def handle_relaxed_data_extractions(doc, semantic_type_objs, obj_dedup_semantic_types, N, gurobi, normalize_conf):
     relaxed_de_paths = ['extractors.content_relaxed.data_extractors']
     for path in relaxed_de_paths:
         expr = parse(path)
@@ -367,11 +376,11 @@ def consolidate_semantic_types(doc, normalize_conf, N, gurobi):
 
     # handle strict data extractions
     semantic_type_objs, obj_dedup_semantic_types = handle_strict_data_extractions(doc, semantic_type_objs,
-                                                                                  obj_dedup_semantic_types, N, gurobi)
+                                                                                  obj_dedup_semantic_types, N, gurobi, normalize_conf)
 
     # handle relaxed data extractions
     semantic_type_objs, obj_dedup_semantic_types = handle_relaxed_data_extractions(doc, semantic_type_objs,
-                                                                                  obj_dedup_semantic_types, N, gurobi)
+                                                                                  obj_dedup_semantic_types, N, gurobi, normalize_conf)
     landmark = None
     if 'landmark' in doc:
         landmark = doc['landmark']
@@ -471,47 +480,50 @@ def add_giant_oak_risk(x, giant_oak_risk_assessment):
         o['name'] = risk
         fields['risk']['strict'].append(o)
     x['fields'] = fields
+    x.pop('extractions', None)
+    x.pop('extractors', None)
+    x.pop('landmark', None)
     return x
 
-
-if __name__ == "__main__":
-    parser = OptionParser()
-    parser.add_option("-r", "--giantOakRisk", action="store", type="string", dest="giantOakRisk")
-    (c_options, args) = parser.parse_args()
-    input_file = args[0]
-    output_file = args[1]
-    normalize_conf_file = args[2]
-    hybrid_jaccard_conf_file = args[3]
-    gurobi_o = args[4]
-
-    giant_oak_risk_assessment = None
-    giant_oak_file = c_options.giantOakRisk
-    if giant_oak_file:
-        giant_oak_risk_assessment = json.load(codecs.open(giant_oak_file, 'r'))
-
-    hybrid_jaccard_config = json.load(codecs.open(hybrid_jaccard_conf_file, 'r'))
-    gurobi = False
-    if gurobi_o == 'yes':
-        gurobi = True
-
-    # print hybrid_jaccard_config
-    N_O = NO(hybrid_jaccard_config=hybrid_jaccard_config)
-    normalize_conf = json.load(codecs.open(normalize_conf_file, 'r', 'utf-8'))
-
-    lines = codecs.open(input_file, 'r').readlines()
-    o = codecs.open(output_file, 'w')
-    i = 1
-    for line in lines:
-        x = json.loads(line)
-        s_t = time.time()
-        print 'processing line # %d' % (i)
-        result = consolidate_semantic_types(x, normalize_conf, N_O, gurobi)
-        if giant_oak_risk_assessment:
-            result = add_giant_oak_risk(result, giant_oak_risk_assessment)
-        o.write(json.dumps(result))
-        e_t = time.time() - s_t
-        if e_t > 1.0:
-            print "Time taken to normalize %s : %f" % (json.loads(line)['doc_id'], e_t)
-        o.write('\n')
-        i += 1
-    o.close()
+#
+# if __name__ == "__main__":
+#     parser = OptionParser()
+#     parser.add_option("-r", "--giantOakRisk", action="store", type="string", dest="giantOakRisk")
+#     (c_options, args) = parser.parse_args()
+#     input_file = args[0]
+#     output_file = args[1]
+#     normalize_conf_file = args[2]
+#     hybrid_jaccard_conf_file = args[3]
+#     gurobi_o = args[4]
+#
+#     giant_oak_risk_assessment = None
+#     giant_oak_file = c_options.giantOakRisk
+#     if giant_oak_file:
+#         giant_oak_risk_assessment = json.load(codecs.open(giant_oak_file, 'r'))
+#
+#     hybrid_jaccard_config = json.load(codecs.open(hybrid_jaccard_conf_file, 'r'))
+#     gurobi = False
+#     if gurobi_o == 'yes':
+#         gurobi = True
+#
+#     # print hybrid_jaccard_config
+#     N_O = NO(hybrid_jaccard_config=hybrid_jaccard_config)
+#     normalize_conf = json.load(codecs.open(normalize_conf_file, 'r', 'utf-8'))
+#
+#     lines = codecs.open(input_file, 'r').readlines()
+#     o = codecs.open(output_file, 'w')
+#     i = 1
+#     for line in lines:
+#         x = json.loads(line)
+#         s_t = time.time()
+#         print 'processing line # %d' % (i)
+#         result = consolidate_semantic_types(x, normalize_conf, N_O, gurobi)
+#         if giant_oak_risk_assessment:
+#             result = add_giant_oak_risk(result, giant_oak_risk_assessment)
+#         o.write(json.dumps(result))
+#         e_t = time.time() - s_t
+#         if e_t > 1.0:
+#             print "Time taken to normalize %s : %f" % (json.loads(line)['doc_id'], e_t)
+#         o.write('\n')
+#         i += 1
+#     o.close()

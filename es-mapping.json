@@ -3971,7 +3971,7 @@
   "settings": {
     "index": {
       "number_of_shards": "10",
-      "number_of_replicas": "1",
+      "number_of_replicas": "0",
       "uuid": "3lwnAPPDSGOXXUuYTbomZw",
       "version": {
         "created": "2040199"

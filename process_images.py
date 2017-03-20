@@ -1,5 +1,5 @@
 from optparse import OptionParser
-from pyspark import SparkContext
+# from pyspark import SparkContext
 import json
 
 
@@ -41,18 +41,42 @@ def process_images(x):
 def strip_uri(uri):
     return uri[uri.rfind('/')+1:]
 
+def choose_one_date(x):
+    chosen_one = '1980-01-01'
+    if 'fields' in x and 'posting_date' in x['fields']:
+        if 'strict' in x['fields']['posting_date']:
+            pd_s = x['fields']['posting_date']['strict']
+            if len(pd_s) > 0:
+                for p in pd_s:
+                    if p['key'] > chosen_one:
+                        chosen_one = p['key']
+        if chosen_one == '1980-01-01':
+            if 'relaxed' in x['fields']['posting_date']:
+                pd_r = x['fields']['posting_date']['relaxed']
+                if len(pd_r) > 0:
+                    for p in pd_r:
+                        if p['key'] > chosen_one:
+                            chosen_one = p['key']
+        if chosen_one:
+            posting_date = dict()
+            out = dict()
+            out['name'] = chosen_one
+            out['key'] = chosen_one
+            posting_date['strict'] = [out]
+            x['fields']['posting_date'] = posting_date
+    return x
 
 
 if __name__ == "__main__":
-    compression = "org.apache.hadoop.io.compress.GzipCodec"
-    sc = SparkContext(appName="Memex Eval 2017 Images")
-    parser = OptionParser()
-    (c_options, args) = parser.parse_args()
-
-    input_path = args[0]
-    output_file = args[1]
-    sc.sequenceFile(input_path).mapValues(json.loads).mapValues(process_images).\
-        mapValues(json.dumps).saveAsSequenceFile(output_file, compressionCodecClass=compression)
+    # compression = "org.apache.hadoop.io.compress.GzipCodec"
+    # sc = SparkContext(appName="Memex Eval 2017 Images")
+    # parser = OptionParser()
+    # (c_options, args) = parser.parse_args()
+    #
+    # input_path = args[0]
+    # output_file = args[1]
+    # sc.sequenceFile(input_path).mapValues(json.loads).mapValues(process_images).\
+    #     mapValues(json.dumps).saveAsSequenceFile(output_file, compressionCodecClass=compression)
 
 
 #     x = """
@@ -145,3 +169,28 @@ if __name__ == "__main__":
 # }"""
 #
 #     print json.dumps(process_images(json.loads(x)))
+
+    x = {
+        "fields": {"posting_date": {
+                         "strict": [
+
+                         ],
+                         "relaxed": [
+                            {
+                               "name": "2018-11-17",
+                               "key": "2018-11-17"
+                            },
+                            {
+                               "name": "2017-01-21",
+                               "key": "2017-01-21"
+                            },
+                            {
+                               "name": "2017-01-25",
+                               "key": "2017-01-25"
+                            }
+                         ]
+                      }
+        }
+    }
+
+    print choose_one_date(x)

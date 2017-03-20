@@ -1,7 +1,7 @@
 import json
 from optparse import OptionParser
 import codecs
-from Normalize import N as NO
+from N.Normalize import N as NO
 from pyspark import SparkContext
 import restructure_format as rf
 
@@ -22,7 +22,6 @@ if __name__ == "__main__":
     gurobi = False
     if gurobi_o == 'yes':
         gurobi = True
-
 
     giant_oak_risk_assessment = None
     giant_oak_file = c_options.giantOakRisk

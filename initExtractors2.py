@@ -533,7 +533,7 @@ class ProcessExtractor(Extractor):
                     metadata['result'] = result
                     metadata['source'] = input_key
 
-                    doc[levelKey][extractor.output] = {'text': [metadata]}
+                    doc[levelKey][extractor.output] = {'text': [output]}
         doc.pop('html', None)
         doc.pop('text', None)
         return doc

@@ -100,7 +100,7 @@ class N(object):
                 if to_unit == 'in':
                     return val / 2.54
         except:
-            print "Conversion of %s from %s to %s failed" % (val, from_unit, to_unit)
+            # print "Conversion of %s from %s to %s failed" % (val, from_unit, to_unit)
             return None
 
     @staticmethod
@@ -268,7 +268,7 @@ class N(object):
             try:
                 d = dateparser.parse(x).isoformat()
             except:
-                print 'Failed to parse %s as date' % (x)
+                # print 'Failed to parse %s as date' % (x)
                 return None
         elif isinstance(x, basestring):
             # print 'BASESRING DATE', x
@@ -338,10 +338,10 @@ class N(object):
             if 'range' in conf:
                 r = conf['range']
                 if not r['lower_bound'] <= int(x) <= r['upper_bound']:
-                    print '%s should be in between %s and %s' % (str(x), r['lower_bound'], r['upper_bound'])
+                    # print '%s should be in between %s and %s' % (str(x), r['lower_bound'], r['upper_bound'])
                     return None
             if not isinstance(x, eval(conf['data_type'])):
-                print '%s expected to be of type %s, but is of type %s' %(str(x), conf['data_type'], type(x))
+                # print '%s expected to be of type %s, but is of type %s' %(str(x), conf['data_type'], type(x))
                 return None
             return x
         except Exception as e:
@@ -424,7 +424,7 @@ class N(object):
         """
         {u'twitter': u'emily'}
         """
-        print x
+        # print x
         if isinstance(x, dict):
             x = [x]
         o_list = list()
