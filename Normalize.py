@@ -1,7 +1,7 @@
 import re
 import dateparser
 import sys
-sys.path.append('/Users/amandeep/Github/dig-crf/src/applyCrf')
+# sys.path.append('/Users/amandeep/Github/dig-crf/src/applyCrf')
 from hybridJaccard import hybridJaccard as hj
 import numbers
 
